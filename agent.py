@@ -1,6 +1,5 @@
 from building import Building
 from degrees import Degree
-from distributions import *
 import numpy as np
 import random
 import math
