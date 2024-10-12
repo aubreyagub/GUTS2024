@@ -46,41 +46,31 @@ class Agent():
 
     def update(self):
         self.time_in_building += 1
-
-        # Update natural stink
         self.stink += self.natural_stink_rate
 
-        # this is the shadow realm!!!!
+        # If you are in the shadow realm...
         if self.current_location.name == BuildingName.SHADOW_REALM:
             self.walk_time_remaining -= 1
-
-        if self.walk_time_remaining != 0:
-            return
-        if self.walk_time_remaining == 0 and self.current_location.name == BuildingName.SHADOW_REALM and self.target_location.fullness < 1:
-            self.current_location = self.target_location
-            return
-
-        if self.current_location != self.target_location:
+            # If you have now finished walking, and your destination isn't full
+            if self.walk_time_remaining <= 0 and self.target_location.fullness < 1:
+                self.current_location = self.target_location
+        # You are not in your target location but not in the shadow realm
+        elif self.current_location != self.target_location:
             self.move()
+        # You are in your target location
         else:
+            # Get stinkier if you are less stinky than the building
             if self.current_location.stink > self.stink:
-                self.stink += self.stink_factor * \
-                    (1 / (1 + math.exp(self.stink - self.current_location.stink)))
-
-            # Keep stink capped between 0 and 1
+                self.stink += self.stink_factor * (1 / (1 + math.exp(self.stink - self.current_location.stink)))
             self.stink = min(self.stink, 1.0)
 
             # Check if the agent perceives the building stink as unpleasant
             perceived_stink = self.current_location.stink - self.stink
-
-            # If the building stink is higher than the agent's stink, they notice it
             if perceived_stink > 0 and self.current_location.stink > self.stink_threshold and self.time_in_building > self.stink_threshold*20:
-
                 # TODO: if capacities don't add up this will crash!!!!!
                 self.target_location = self.get_next_location()
                 while self.target_location.fullness == 1:
                     self.target_location = self.get_next_location()
-
             else:
                 self.time_studied += 1
 
@@ -90,10 +80,11 @@ class Agent():
     
     def move(self):
         self.current_location = self.buildings[BuildingName.SHADOW_REALM]
-        # self.current_location = self.target_location
         self.time_in_building = 0
         self.walk_time_remaining = 10
 
+
+    # Functions to randomly generate attributes
     def generate_stink_factor(self):
         stink_factor = np.random.normal(
             self.degree.STINK_FACTOR_DISTRIBUTION[0], self.degree.STINK_FACTOR_DISTRIBUTION[1])

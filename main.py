@@ -16,12 +16,12 @@ def generate_student(buildings):
 
 def main():
     buildings = {
-        BuildingName.BOYD_ORR: Building(BuildingName.BOYD_ORR, 10),  # , has_shower=True),
+        BuildingName.BOYD_ORR: Building(BuildingName.BOYD_ORR, 15),  # , has_shower=True),
         BuildingName.JMS: Building(BuildingName.JMS, 10),
         BuildingName.FRASER_BUILDING: Building(BuildingName.FRASER_BUILDING, 10),
-        BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, 15),
-        BuildingName.ASBS: Building(BuildingName.ASBS, 20),
-        BuildingName.LIBRARY: Building(BuildingName.LIBRARY, 16),
+        BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, 10),
+        BuildingName.ASBS: Building(BuildingName.ASBS, 10),
+        BuildingName.LIBRARY: Building(BuildingName.LIBRARY, 25),
         BuildingName.SHADOW_REALM: Building(BuildingName.SHADOW_REALM, math.inf)
     }
 
