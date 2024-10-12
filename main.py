@@ -77,5 +77,47 @@ def main():
 
     plt.show()
 
+    # fig, ax = plt.subplots(figsize=(8, 8))
+    # ax.set_title("Agent Movement Simulation")
+    # ax.set_xlabel("Longitude")
+    # ax.set_ylabel("Latitude")
+    
+    # # Set plot boundaries (adjust based on actual coordinates)
+    # ax.set_xlim(-4.295, -4.285)
+    # ax.set_ylim(55.870, 55.875)
+    
+    # # Plot buildings as fixed points
+    # for building in buildings:
+    #     ax.plot(building.coordinate[1], building.coordinate[0], "ro", markersize=8, label=building.name)
+
+    # # Initialize scatter plot for agents
+    # agent_scatter = ax.scatter([], [], s=50, c='blue', label='Agents')
+
+    # # Update function for animation
+    # def plot_update(frame):
+    #     map.update()
+        
+    #     # Get agent locations for this frame
+    #     x_data, y_data = [], []
+    #     for agent in agents:
+    #         lon, lat = agent.current_coordinate[1], agent.current_coordinate[0]
+    #         x_data.append(lon)
+    #         y_data.append(lat)
+        
+    #     # Update scatter plot data
+    #     agent_scatter.set_offsets(list(zip(x_data, y_data)))
+        
+    #     return agent_scatter,
+
+    # map = Map(agents, buildings)
+
+    # print("STARTING SIMULATION\n\n")
+
+    # # Create animation
+    # ani = animation.FuncAnimation(fig, plot_update, frames=1000, interval=100, blit=True)
+
+    # plt.legend(loc="lower left")
+    # plt.show()
+
 if __name__ == "__main__":
     main()
