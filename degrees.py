@@ -9,15 +9,15 @@ class Degree:
 
 class ComputerScience(Degree):
     STINK_THRESHOLD_DISTRIBUTION = (0.5, 0.2)
-    NATURAL_STINK_RATE_DISTRIBUTION = (0.001, 0.0002)
-    STINK_FACTOR_DISTRIBUTION = (0.001, 0.0001)
+    NATURAL_STINK_RATE_DISTRIBUTION = (0.002, 0.0002)
+    STINK_FACTOR_DISTRIBUTION = (0.002, 0.0001)
     BUILDING_PREFERENCE = {
-        BuildingName.BOYD_ORR: 0.6,
-        BuildingName.JMS: 0.0,
-        BuildingName.FRASER_BUILDING: 0.0,
-        BuildingName.LIBRARY: 0.3,
-        BuildingName.READING_ROOM: 0.1,
-        BuildingName.ASBS: 0.0,
+        BuildingName.BOYD_ORR: 0.49,
+        BuildingName.JMS: 0.2,
+        BuildingName.FRASER_BUILDING: 0.1/3,
+        BuildingName.READING_ROOM: 0.1/3,
+        BuildingName.ASBS: 0.01,
+        BuildingName.LIBRARY: 0.2,
         BuildingName.SHADOW_REALM: 0.0
     }
 
@@ -30,11 +30,11 @@ class Business(Degree):
     STINK_FACTOR_DISTRIBUTION = (0.001, 0.0001)
     BUILDING_PREFERENCE = {
         BuildingName.BOYD_ORR: 0.1,
-        BuildingName.JMS: 0.0,
-        BuildingName.FRASER_BUILDING: 0.0,
-        BuildingName.LIBRARY: 0.3,
-        BuildingName.READING_ROOM: 0.6,
-        BuildingName.ASBS: 0.0,
+        BuildingName.JMS: 0.2,
+        BuildingName.FRASER_BUILDING: 0.1/3,
+        BuildingName.READING_ROOM: 0.1/3,
+        BuildingName.ASBS: 0.5,
+        BuildingName.LIBRARY: 0.2,
         BuildingName.SHADOW_REALM: 0.0
     }
 
@@ -46,12 +46,12 @@ class History(Degree):
     NATURAL_STINK_RATE_DISTRIBUTION = (0.0003, 0.0001)
     STINK_FACTOR_DISTRIBUTION = (0.001, 0.0001)
     BUILDING_PREFERENCE = {
-        BuildingName.BOYD_ORR: 0.1,
-        BuildingName.JMS: 0.0,
-        BuildingName.FRASER_BUILDING: 0.0,
+        BuildingName.BOYD_ORR: 0.0,
+        BuildingName.JMS: 0.2,
+        BuildingName.FRASER_BUILDING: 0.1,
+        BuildingName.READING_ROOM: 0.39,
+        BuildingName.ASBS: 0.01,
         BuildingName.LIBRARY: 0.3,
-        BuildingName.READING_ROOM: 0.6,
-        BuildingName.ASBS: 0.0,
         BuildingName.SHADOW_REALM: 0.0
     }
 

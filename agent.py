@@ -15,10 +15,11 @@ def clamp(n, min=0, max=1):
         else:
             return n
 class Agent():
-    def __init__(self, name: str, degree: Degree, buildings, stink=0.0):
+    def __init__(self, name: str, degree: Degree, buildings, stink=0.0, poi = False):
         self.name = name
         self.degree = degree
         self.buildings = buildings
+        self.poi = poi
 
         self.stink_threshold = self.generate_stink_threshold()
         self.natural_stink_rate = self.generate_natural_stink_rate()
