@@ -79,4 +79,4 @@ class Agent():
         self.current_location = self.building_preferences[0][3]
         # self.current_location = self.target_location
         self.time_in_building = 0
-        self.walk_time_remaining = 1
+        self.walk_time_remaining = 10

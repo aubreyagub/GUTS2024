@@ -9,7 +9,7 @@ class Building:
         self.internal_stinks = []
         self.agents = set()
         self.stink_accumulation_rate = rate
-        self.stink_dissipation_rate = 3 * rate
+        self.stink_dissipation_rate = 2 * rate
         self.has_shower = has_shower
         self.capacity = capacity
         self.fullness = 0

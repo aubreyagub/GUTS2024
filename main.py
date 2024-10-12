@@ -124,7 +124,7 @@ def main():
 
     # Create animation
     ani = animation.FuncAnimation(
-        fig, plot_update, frames=480, interval=1, blit=False)
+        fig, plot_update, frames=480, interval=5, blit=False)
 
     plt.show()
 
