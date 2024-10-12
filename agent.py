@@ -2,15 +2,15 @@ from building import Building
 import random
 
 PERSON_SPEED = 2.0
-STINK_INCREASE = 0.001
-BUILDING_STINK_MULTIPLIER = 0.01
 
 class Agent():
-    def __init__(self, name: str, course: str, stink_threshold: float, stink_awareness: float, building_preferences: tuple, stink=0.0):
+    def __init__(self, name: str, course: str, stink_threshold: float, building_preferences: tuple, stink=0.0):
         self.name = name
         self.course = course
         self.stink_threshold = stink_threshold
-        self.stink_awareness = stink_awareness
+        self.natural_stink_rate = 0.03
+        self.max_natural_stink = 0.3
+        self.stink_factor = 0.5
 
         self.time_studied = 0.0
         self.stink = stink
@@ -22,21 +22,29 @@ class Agent():
         self.current_location = starting_location
 
     def update(self):
-        self.stink = self.stink + (STINK_INCREASE + (self.current_location.stink*BUILDING_STINK_MULTIPLIER))
+        # Update natural stink
+        self.stink = min(self.stink + self.natural_stink_rate, self.max_natural_stink)
 
         if self.current_location != self.target_location:
             self.move()
             return
         else:
-            # consider stink level
-            perceieved_stink = max(self.current_location.stink - self.stink, 0)
-            print(f"stink of {self.current_location.name}: {self.current_location.stink}")
-            print(f"perceived stink: {perceieved_stink}")
-            if perceieved_stink > self.stink_threshold:
+            self.stink += self.stink_factor * self.current_location.stink
+
+            # Keep stink capped between 0 and 1
+            self.stink = min(self.stink, 1.0)
+
+
+            # Check if the agent perceives the building stink as unpleasant
+            perceived_stink = self.current_location.stink - self.stink
+
+            # If the building stink is higher than the agent's stink, they notice it
+            if perceived_stink > 0 and self.current_location.stink > self.stink_threshold:
                 self.target_location = self.get_next_location()
                 return
             else:
-                self.time_studied += 1
+                self.time_studied +=1
+                return
 
     def get_next_location(self) -> Building:
         return random.choices(self.building_preferences[0], self.building_preferences[1], k=1)[0]

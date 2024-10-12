@@ -3,7 +3,7 @@ from typing import List
 from building import Building
 from agent import Agent
 
-BUILDING_STINK_MULTIPLIER = 0.1
+BUILDING_STINK_MULTIPLIER = 0.5
 
 class Map:
     def __init__(self, agents: list[Agent], buildings: list[Building]):
@@ -13,22 +13,16 @@ class Map:
     def update(self):
         building_occupancy = {}
 
-        for building in self.buildings:
-            building.update()
-
         for agent in self.agents:
             if agent.current_location in building_occupancy.keys():
                 building_occupancy[agent.current_location].append(agent)
             else:
                 building_occupancy[agent.current_location] = [agent]
-            agent.update()
 
-        # SET AVG STINK FOR EACH BUILDING
-        for building in building_occupancy:
-            total_stink = 0
-            agent_count = 0
-            for agent in building_occupancy[building]:
-                total_stink += agent.stink
-                agent_count += 1
-            avg_stink = total_stink/agent_count
-            building.set_stink(avg_stink)
+        for building in self.buildings:
+            stinks_inside = [agent.stink for agent in building_occupancy.get(building, [])]
+            building.set_internal_stinks(stinks_inside)
+            building.update()
+
+        for agent in self.agents:
+            agent.update()

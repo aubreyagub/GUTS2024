@@ -8,9 +8,9 @@ import matplotlib.animation as animation
 def main():
 
     buildings = []
-    boyd_orr = Building("boyd orr")
-    library = Building("library")
-    reading_room = Building("reading room")
+    boyd_orr = Building("boyd orr", 0.3, 0.1)
+    library = Building("library", 0.3, 0.2)
+    reading_room = Building("reading room", 0.1, 0.3)
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)
@@ -21,11 +21,11 @@ def main():
 }
 
     agents = []
-    agents.append(Agent("Jordan", "CS", 0.7, 0.3, STUDENT_PREFERENCES["CS"], 1.0))
-    agents.append(Agent("John", "History", 0.3, 0.7, STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb", "CS", 0.8, 0.1, STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie", "History", 0.2, 0.7, STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan", "CS", 0.7, 0.1, STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", 0.7, STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("John", "History", 0.3, STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", 0.8, STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", 0.2, STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", 0.7, STUDENT_PREFERENCES["CS"]))
 
     ### MATPLOTLIB STUFF BELOW
 
@@ -41,7 +41,7 @@ def main():
 
     # Secondary y-axis for bar chart of stink levels
     ax2 = ax.twinx()
-    ax2.set_ylim(0, 10)
+    ax2.set_ylim(0, 1)
     ax2.set_ylabel("Building Stink Level")
     bars = ax2.bar(range(len(buildings)), [building.stink for building in buildings], color='red', alpha=0.6, width=0.4)
 
