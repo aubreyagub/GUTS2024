@@ -29,7 +29,9 @@ class Agent():
             return
         else:
             # consider stink level
-            perceieved_stink = self.current_location.stink - self.stink*BUILDING_STINK_MULTIPLIER
+            perceieved_stink = max(self.current_location.stink - self.stink, 0)
+            print(f"stink of {self.current_location.name}: {self.current_location.stink}")
+            print(f"perceived stink: {perceieved_stink}")
             if perceieved_stink > self.stink_threshold:
                 self.target_location = self.get_next_location()
                 return
@@ -40,5 +42,4 @@ class Agent():
         return random.choices(self.building_preferences[0], self.building_preferences[1], k=1)[0]
 
     def move(self):
-        print(f"{self.name} has decided to move to {self.target_location.name}")
         self.current_location = self.target_location

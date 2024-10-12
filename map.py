@@ -11,11 +11,24 @@ class Map:
         self.buildings = buildings
 
     def update(self):
+        building_occupancy = {}
+
         for building in self.buildings:
             building.update()
-            #print(f"{building.name} is {round(building.stink, 3)} stinky")
 
         for agent in self.agents:
-            agent.current_location.add_stink(agent.stink*BUILDING_STINK_MULTIPLIER)
+            if agent.current_location in building_occupancy.keys():
+                building_occupancy[agent.current_location].append(agent)
+            else:
+                building_occupancy[agent.current_location] = [agent]
             agent.update()
-            #print(f"{agent.name} is {round(agent.stink, 3)} stinky in {agent.current_location.name}")
+
+        # SET AVG STINK FOR EACH BUILDING
+        for building in building_occupancy:
+            total_stink = 0
+            agent_count = 0
+            for agent in building_occupancy[building]:
+                total_stink += agent.stink
+                agent_count += 1
+            avg_stink = total_stink/agent_count
+            building.set_stink(avg_stink)
