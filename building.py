@@ -1,9 +1,9 @@
 import random
 from typing import List
-
+from enums import BuildingName
 
 class Building:
-    def __init__(self, name, capacity: int, coordinate=(), rate=0.01, has_shower=False):
+    def __init__(self, name: BuildingName, capacity: int, rate=0.01, has_shower=False):
         self.name = name
         self.stink = 0
         self.internal_stinks = []
@@ -11,7 +11,6 @@ class Building:
         self.stink_accumulation_rate = rate
         self.stink_dissipation_rate = 2 * rate
         self.has_shower = has_shower
-        self.coordinate = coordinate
         self.capacity = capacity
         self.fullness = 0
 
