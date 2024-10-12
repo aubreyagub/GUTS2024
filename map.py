@@ -32,3 +32,30 @@ class Map:
                 agent_count += 1
             avg_stink = total_stink/agent_count
             building.set_stink(avg_stink)
+
+
+
+    def get_path(self, start, end):
+        bo_to_lib = []
+        lib_to_rr = []
+        rr_to_bo = []
+        
+        match start:
+                case "boyd orr":
+                    match end:
+                        case "library":
+                            return 
+                        case "reading room":
+                            return 
+                case "library":
+                    match end:
+                        case "boyd orr":
+                            return 
+                        case "reading room":
+                            return
+                case "reading room":
+                    match end:
+                        case "boyd orr":
+                            return 
+                        case "library":
+                            return
