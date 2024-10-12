@@ -2,7 +2,7 @@ from agent import Agent
 from building import Building
 from map import Map
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def main():
 
