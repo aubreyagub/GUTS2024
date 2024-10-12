@@ -11,7 +11,6 @@ class Agent():
         self.course = course
         self.stink_threshold = generate_stink_threshold(course)
         self.natural_stink_rate = generate_natural_stink_rate(course)
-        self.max_natural_stink = generate_max_natural_stink(course)
         self.stink_factor = generate_stink_factor(course)
 
         self.time_studied = 0.0
