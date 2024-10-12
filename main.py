@@ -8,9 +8,9 @@ import matplotlib.animation as animation
 def main():
 
     buildings = []
-    boyd_orr = Building("boyd orr")
-    library = Building("library")
-    reading_room = Building("reading room")
+    boyd_orr = Building("boyd orr", (55.873498, -4.292804))
+    library = Building("library", (55.873323, -4.288474))
+    reading_room = Building("reading room", (55.872346, -4.288193))
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)

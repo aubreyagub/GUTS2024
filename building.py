@@ -3,9 +3,10 @@ from typing import List
 
 DECAY_MULTIPLIER = 0.1
 class Building:
-    def __init__(self, name):
+    def __init__(self, name, coordinate):
         self.name = name
         self.stink = 0
+        self.coordinate = coordinate
 
         self.agents = set()
 
