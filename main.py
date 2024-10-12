@@ -11,13 +11,15 @@ def main():
     boyd_orr = Building("boyd orr", 0.3, 0.1, (55.873498, -4.292804))
     library = Building("library", 0.3, 0.2, (55.873323, -4.288474))
     reading_room = Building("reading room", 0.1, 0.3, (55.872346, -4.288193))
+    fraser_building = Building("fraser building", 0.2, 0.1, (55.873218, -4.288445))
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)
+    buildings.append(fraser_building)
 
     STUDENT_PREFERENCES = {
-    "CS": ([boyd_orr, library, reading_room], [0.6, 0.3, 0.1]),
-    "History": ([boyd_orr, library, reading_room], [0.1, 0.3, 0.6]),
+    "CS": ([boyd_orr, library, reading_room, fraser_building], [0.5, 0.3, 0.1, 0.1]),
+    "History": ([boyd_orr, library, reading_room, fraser_building], [0.1, 0.3, 0.4, 0.2]),
 }
 
     agents = []
@@ -26,6 +28,11 @@ def main():
     agents.append(Agent("Jeb", "CS", 0.8, STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie", "History", 0.2, STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Johan", "CS", 0.7, STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Anna", "CS", 0.7, STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("Amy", "History", 0.3, STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Alex", "CS", 0.8, STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Arya", "History", 0.2, STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Ali", "CS", 0.7, STUDENT_PREFERENCES["CS"]))
 
     ### MATPLOTLIB STUFF BELOW
 
