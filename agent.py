@@ -4,6 +4,7 @@ import numpy as np
 import random
 import math
 from enums import BuildingName
+import paths
 
 PERSON_SPEED = 2.0
 
@@ -29,17 +30,15 @@ class Agent():
 
         self.building_preferences = degree.BUILDING_PREFERENCE
 
-        
-        self.path = []
-        self.target_coordinate = starting_location.coordinate
-        self.current_coordinate = starting_location.coordinate
-
         starting_location = self.get_next_location()
         self.target_location = starting_location
         self.current_location = starting_location
         self.time_in_building = 0
-        self.walk_time_remaining = 0
+        # self.walk_time_remaining = 0
 
+        self.path = []
+        self.target_coordinate = starting_location.coordinate
+        self.current_coordinate = starting_location.coordinate
     
     def take_a_shower(self):
         self.stink = 0
@@ -48,14 +47,7 @@ class Agent():
         self.time_in_building += 1
         self.stink += self.natural_stink_rate
 
-        # If you are in the shadow realm...
-        if self.current_location.name == BuildingName.SHADOW_REALM:
-            self.walk_time_remaining -= 1
-            # If you have now finished walking, and your destination isn't full
-            if self.walk_time_remaining <= 0 and self.target_location.fullness < 1:
-                self.current_location = self.target_location
-        # You are not in your target location but not in the shadow realm
-        elif self.current_location != self.target_location:
+        if self.current_location != self.target_location:
             self.move()
         # You are in your target location
         else:
@@ -69,6 +61,8 @@ class Agent():
             if perceived_stink > 0 and self.current_location.stink > self.stink_threshold and self.time_in_building > self.stink_threshold*20:
                 # TODO: if capacities don't add up this will crash!!!!!
                 self.target_location = self.get_next_location()
+                self.path = self.get_path(self.current_location.name, self.target_location.name)
+                print(f"{self.name} is moving from {self.current_location.name} to {self.target_location.name}")
                 while self.target_location.fullness == 1:
                     self.target_location = self.get_next_location()
             else:
@@ -78,11 +72,29 @@ class Agent():
         building_name = random.choices(list(self.buildings.keys()), self.building_preferences.values(), k=1)[0]
         return self.buildings[building_name]
     
+    # def move(self):
+    #     self.current_location = self.buildings[BuildingName.SHADOW_REALM]
+    #     self.time_in_building = 0
+    #     self.walk_time_remaining = 10
+
     def move(self):
         self.current_location = self.buildings[BuildingName.SHADOW_REALM]
-        self.time_in_building = 0
-        self.walk_time_remaining = 10
+        if len(self.path) > 1:
+            self.current_coordinate = self.path.pop(0)
+        elif len(self.path) == 1:
+            self.current_coordinate = self.path.pop()
+            self.current_location = self.target_location
+        else:
+            print("Path is empty")
+            return
 
+    def get_path(self, start, end):
+        path_key = (start,end)
+        if path_key in paths.paths:  
+            return paths.paths[path_key].copy()
+        else:
+            print(f"Path not found between {start} and {end}")
+            return []
 
     # Functions to randomly generate attributes
     def generate_stink_factor(self):
@@ -99,3 +111,4 @@ class Agent():
         stink_threshold = np.random.normal(
             self.degree.STINK_THRESHOLD_DISTRIBUTION[0], self.degree.STINK_THRESHOLD_DISTRIBUTION[1])
         return clamp(stink_threshold)
+
