@@ -8,9 +8,9 @@ import matplotlib.animation as animation
 def main():
 
     buildings = []
-    boyd_orr = Building("boyd orr", 0.2, 0.05, 40)
-    library = Building("library", 0.2, 0.1, 60)
-    reading_room = Building("reading room", 0.1, 0.05, 30)
+    boyd_orr = Building("boyd orr", 10, has_shower=True)
+    library = Building("library", 15)
+    reading_room = Building("reading room", 15)
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)
@@ -26,7 +26,7 @@ def main():
     agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 0.5))
     agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
@@ -36,7 +36,7 @@ def main():
     agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
@@ -46,7 +46,7 @@ def main():
     agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
@@ -57,11 +57,13 @@ def main():
     agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
     agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+
+    map = Map(agents, buildings)
 
     ### MATPLOTLIB STUFF BELOW
 
@@ -69,11 +71,11 @@ def main():
     ax.set_xlim(-1, len(buildings))
     ax.set_ylim(-1, len(agents))
     ax.set_xticks(range(len(buildings)))
-    ax.set_xticklabels([building.name for building in buildings])
+    ax.set_xticklabels([f"{building.name}: {len(map.get_building_occupancies()[building])}" for building in buildings])
     ax.set_yticks(range(len(agents)))
     ax.set_yticklabels([agent.name for agent in agents])
     ax.set_xlabel("Buildings")
-    ax.set_title("Agent Movement Simulation")
+    ax.set_title(f"TOTAL STINK: {round(map.get_total_stink(), 3)}")
 
     # Secondary y-axis for bar chart of stink levels
     ax2 = ax.twinx()
@@ -90,6 +92,8 @@ def main():
         # Move each agent to a new random building
         x_data = []
         y_data = []
+        ax.set_xticklabels([f"{building.name}: {len(map.get_building_occupancies()[building])}" for building in buildings])
+        ax.set_title(f"TOTAL STINK: {round(map.get_total_stink(), 3)}")
         for i, agent in enumerate(agents):
             # Append the x and y positions for plotting
             x_data.append(buildings.index(agent.current_location))
@@ -104,12 +108,10 @@ def main():
 
         return (scat, *bars)
 
-    map = Map(agents, buildings)
-
     print("STARTING SIMULATION\n\n")
 
     # Create animation
-    ani = animation.FuncAnimation(fig, plot_update, frames=1000, interval=100, blit=True)
+    ani = animation.FuncAnimation(fig, plot_update, frames=1000, interval=500, blit=False)
 
     plt.show()
 

@@ -29,31 +29,28 @@ class Agent():
         self.time_in_building += 1
 
         # Update natural stink
-        self.stink = min(self.stink + self.natural_stink_rate, self.max_natural_stink)
-
-        if self.time_in_building > 18:
-            self.target_location = self.get_next_location()
+        self.stink += self.natural_stink_rate
 
         if self.current_location != self.target_location:
             self.move()
-            return
         else:
             self.stink += self.stink_factor * self.current_location.stink
 
             # Keep stink capped between 0 and 1
             self.stink = min(self.stink, 1.0)
 
-
             # Check if the agent perceives the building stink as unpleasant
             perceived_stink = self.current_location.stink - self.stink
 
             # If the building stink is higher than the agent's stink, they notice it
-            if perceived_stink > 0 and self.current_location.stink > self.stink_threshold and self.time_in_building > self.stink_threshold*10:
+            if perceived_stink > 0 and self.current_location.stink > self.stink_threshold and self.time_in_building > self.stink_threshold*20:
                 self.target_location = self.get_next_location()
-                return
             else:
                 self.time_studied +=1
-                return
+
+            shower_p = random.randrange(1,10)
+            if shower_p == 1 and self.current_location.has_shower:
+                self.stink = 0
 
     def get_next_location(self) -> Building:
         return random.choices(self.building_preferences[0], self.building_preferences[1], k=1)[0]
