@@ -42,7 +42,7 @@ paths = {
 }
 
 class Agent():
-    def __init__(self, name: str, course: str, stink_threshold: float, stink_awareness: float, building_preferences: tuple, stink=0.0, path=[]):
+    def __init__(self, name: str, course: str, stink_threshold: float, stink_awareness: float, building_preferences: tuple, stink=0.0):
         self.name = name
         self.course = course
         self.stink_threshold = stink_threshold
@@ -50,10 +50,10 @@ class Agent():
 
         self.time_studied = 0.0
         self.stink = stink
-        self.path = []
 
         self.building_preferences = building_preferences
 
+        self.path = []
         starting_location = self.get_next_location()
         self.target_location = starting_location
         self.current_location = starting_location
@@ -81,8 +81,12 @@ class Agent():
         return random.choices(self.building_preferences[0], self.building_preferences[1], k=1)[0]
 
     def move(self):
+        self.current_location = self.path[0]
+        self.path = self.path[1:-1]        
         self.current_location = self.target_location
 
     def get_path(self, start, end):
         path_key = start + " " + end  
         return paths[path_key]
+    
+
