@@ -13,6 +13,8 @@ import math
 
 DEBUG = False
 STUDENT_COUNT = 250
+URL = "192.168.1.253"
+PORT = "3069"
 
 def generate_student(buildings):
     name = "A"
@@ -108,9 +110,11 @@ def main():
         print(f"Simulation complete. {len(simulation)} ticks recorded")
 
         # do post requests
-        
+        endpoint = f"{URL}:{PORT}"
+        data = {
 
-        
+        }
+        requests.post(endpoint, json=data)
 
 if __name__ == "__main__":
     main()
