@@ -16,7 +16,7 @@ class Map:
 
         building_occupancy = self.get_building_occupancies()
 
-        for building in self.buildings:
+        for building in self.buildings.values():
             stinks_inside = [
                 agent.stink for agent in building_occupancy.get(building, [])]
             building.set_internal_stinks(stinks_inside)
@@ -43,5 +43,5 @@ class Map:
     def clean(self):
         for agent in self.agents:
             agent.take_a_shower()
-        for building in self.buildings:
+        for building in self.buildings.values():
             building.clean()

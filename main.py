@@ -1,71 +1,31 @@
 from agent import Agent
 from building import Building
 from map import Map
+from enum import Enum
+import random
+from degrees import *
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import math
 
+def generate_student(buildings):
+    name = "A"
+    degree = random.choice(list(DegreeTitle))
+    return Agent(name, degree.value, buildings)
 
 def main():
-
-    buildings = []
-    boyd_orr = Building("boyd orr", 10)  # , has_shower=True)
-    library = Building("library", 16)
-    reading_room = Building("reading room", 15)
-    shadow_realm = Building("shadow_realm", math.inf)
-    buildings.append(boyd_orr)
-    buildings.append(library)
-    buildings.append(reading_room)
-    buildings.append(shadow_realm)
-
-    STUDENT_PREFERENCES = {
-        "CS": ([boyd_orr, library, reading_room, shadow_realm], [0.6, 0.3, 0.1, 0.0]),
-        "History": ([boyd_orr, library, reading_room, shadow_realm], [0.1, 0.3, 0.6, 0.0]),
+    buildings = {
+        BuildingName.BOYD_ORR: Building(BuildingName.BOYD_ORR, 10),  # , has_shower=True),
+        BuildingName.JMS: Building(BuildingName.JMS, 10),
+        BuildingName.FRASER_BUILDING: Building(BuildingName.FRASER_BUILDING, 10),
+        BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, 15),
+        BuildingName.ASBS: Building(BuildingName.ASBS, 20),
+        BuildingName.LIBRARY: Building(BuildingName.LIBRARY, 16),
+        BuildingName.SHADOW_REALM: Building(BuildingName.SHADOW_REALM, math.inf)
     }
 
-    agents = []
-    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"], 1.0))
-    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents = [generate_student(buildings) for i in range(50)]
 
     map = Map(agents, buildings)
 
@@ -76,7 +36,7 @@ def main():
     ax.set_ylim(-1, len(agents))
     ax.set_xticks(range(len(buildings)))
     ax.set_xticklabels(
-        [f"{building.name}: {len(map.get_building_occupancies().get(building, []))}" for building in buildings])
+        [f"{building.name.value}: {len(map.get_building_occupancies().get(building, []))}" for building in buildings.values()])
     ax.set_yticks(range(len(agents)))
     ax.set_yticklabels([agent.name for agent in agents])
     ax.set_xlabel("Buildings")
@@ -87,7 +47,7 @@ def main():
     ax2.set_ylim(0, 1)
     ax2.set_ylabel("Building Stink Level")
     bars = ax2.bar(range(len(buildings)), [
-                   building.stink for building in buildings], color='red', alpha=0.6, width=0.4)
+                   building.stink for building in buildings.values()], color='red', alpha=0.6, width=0.4)
 
     # Initialize scatter plot
     scat = ax.scatter([], [], s=100, c='blue')
@@ -102,11 +62,11 @@ def main():
         x_data = []
         y_data = []
         ax.set_xticklabels(
-            [f"{building.name}: {len(map.get_building_occupancies().get(building, []))}" for building in buildings])
+            [f"{building.name.value}: {len(map.get_building_occupancies().get(building, []))}" for building in buildings.values()])
         ax.set_title(f"TOTAL STINK: {round(map.get_total_stink(), 3)}")
         for i, agent in enumerate(agents):
             # Append the x and y positions for plotting
-            x_data.append(buildings.index(agent.current_location))
+            x_data.append(list(buildings.keys()).index(agent.current_location.name))
             y_data.append(i)
 
         ax.set_xlabel(f"{frame}")
@@ -115,7 +75,7 @@ def main():
         scat.set_offsets(list(zip(x_data, y_data)))
 
         # Update the bar heights to reflect current stink levels
-        for j, building in enumerate(buildings):
+        for j, building in enumerate(buildings.values()):
             bars[j].set_height(building.stink)
 
         return (scat, *bars)
