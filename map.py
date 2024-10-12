@@ -5,6 +5,7 @@ from agent import Agent
 
 BUILDING_STINK_MULTIPLIER = 0.5
 
+
 class Map:
     def __init__(self, agents: list[Agent], buildings: list[Building]):
         self.agents = agents
@@ -16,7 +17,8 @@ class Map:
         building_occupancy = self.get_building_occupancies()
 
         for building in self.buildings:
-            stinks_inside = [agent.stink for agent in building_occupancy.get(building, [])]
+            stinks_inside = [
+                agent.stink for agent in building_occupancy.get(building, [])]
             building.set_internal_stinks(stinks_inside)
             building.update()
 
@@ -31,9 +33,15 @@ class Map:
             else:
                 building_occupancy[agent.current_location] = [agent]
         return building_occupancy
-    
+
     def get_total_stink(self):
         total = 0
         for agent in self.agents:
             total += agent.stink
         return total
+
+    def clean(self):
+        for agent in self.agents:
+            agent.take_a_shower()
+        for building in self.buildings:
+            building.clean()
