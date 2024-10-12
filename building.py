@@ -3,13 +3,14 @@ from typing import List
 
 DECAY_MULTIPLIER = 0.1
 class Building:
-    def __init__(self, name, stink_accumulation_rate: float, stink_dissipation_rate: float):
+    def __init__(self, name, stink_accumulation_rate: float, stink_dissipation_rate: float, capacity: int):
         self.name = name
         self.stink = 0
         self.internal_stinks = []
         self.agents = set()
         self.stink_accumulation_rate = stink_accumulation_rate
         self.stink_dissipation_rate = stink_dissipation_rate
+        self.capacity = capacity
 
     def set_stink(self, stink):
         self.stink = stink
@@ -18,9 +19,8 @@ class Building:
         self.internal_stinks = stinks_list
 
     def update(self):
-        print(self.internal_stinks)
         # Calculate the contribution of each agent to the building stink
-        accumulated_stink = sum(stink for stink in self.internal_stinks) * self.stink_accumulation_rate
+        accumulated_stink = (sum(stink for stink in self.internal_stinks) * self.stink_accumulation_rate) / self.capacity
         
         # Update building stink
         self.stink = max(0, self.stink * (1 - self.stink_dissipation_rate) + accumulated_stink)

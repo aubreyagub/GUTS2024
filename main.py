@@ -8,24 +8,60 @@ import matplotlib.animation as animation
 def main():
 
     buildings = []
-    boyd_orr = Building("boyd orr", 0.3, 0.1)
-    library = Building("library", 0.3, 0.2)
-    reading_room = Building("reading room", 0.1, 0.3)
+    boyd_orr = Building("boyd orr", 0.2, 0.05, 40)
+    library = Building("library", 0.2, 0.1, 60)
+    reading_room = Building("reading room", 0.1, 0.05, 30)
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)
 
     STUDENT_PREFERENCES = {
-    "CS": ([boyd_orr, library, reading_room], [0.6, 0.3, 0.1]),
-    "History": ([boyd_orr, library, reading_room], [0.1, 0.3, 0.6]),
-}
+        "CS": ([boyd_orr, library, reading_room], [0.6, 0.3, 0.1]),
+        "History": ([boyd_orr, library, reading_room], [0.1, 0.3, 0.6]),
+    }
 
     agents = []
-    agents.append(Agent("Jordan", "CS", 0.7, STUDENT_PREFERENCES["CS"], 1.0))
-    agents.append(Agent("John", "History", 0.3, STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Jeb", "CS", 0.8, STUDENT_PREFERENCES["CS"]))
-    agents.append(Agent("Jamie", "History", 0.2, STUDENT_PREFERENCES["History"]))
-    agents.append(Agent("Johan", "CS", 0.7, STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
 
     ### MATPLOTLIB STUFF BELOW
 
