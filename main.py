@@ -4,27 +4,74 @@ from map import Map
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import math
+
 
 def main():
 
     buildings = []
-    boyd_orr = Building("boyd orr", 0.3, 0.1, (55.873498, -4.292804))
-    library = Building("library", 0.3, 0.2, (55.873323, -4.288474))
-    reading_room = Building("reading room", 0.1, 0.3, (55.872346, -4.288193))
-    fraser_building = Building("fraser building", 0.2, 0.1, (55.873218, -4.288445))
-    jms = Building("james mccune smith", 0.2, 0.1, (55.873150, -4.292460))
+    boyd_orr = Building("boyd orr", 10,  (55.873498, -4.292804)) #has_shower=True)
+    library = Building("library", 16, (55.873323, -4.288474))
+    reading_room = Building("reading room", 15, (55.872346, -4.288193))
+    fraser_building = Building("fraser building", 5 (55.873218, -4.288445))
+    jms = Building("james mccune smith", 7, (55.873150, -4.292460))
+    shadow_realm = Building("shadow_realm", math.inf)
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)
     buildings.append(fraser_building)
     buildings.append(jms)
+    buildings.append(shadow_realm)
 
     STUDENT_PREFERENCES = {
-    "CS": (buildings, [0.4, 0.3, 0.1, 0.1, 0.1]),
-    "History": (buildings, [0.1, 0.2, 0.4, 0.2, 0.1]),
-}
+        "CS": (buildings, [0.6, 0.3, 0.1, 0.0]),
+        "History": (buildings, [0.1, 0.3, 0.6, 0.0]),
+    }
 
     agents = []
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"], 1.0))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jordan2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("John2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Jeb2", "CS", STUDENT_PREFERENCES["CS"]))
+    agents.append(Agent("Jamie2", "History", STUDENT_PREFERENCES["History"]))
+    agents.append(Agent("Johan2", "CS", STUDENT_PREFERENCES["CS"]))
+
+    map = Map(agents, buildings)
     agents.append(Agent("Jordan", "CS", 0.7, STUDENT_PREFERENCES["CS"], 1.0))
     agents.append(Agent("John", "History", 0.3, STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Jeb", "CS", 0.8, STUDENT_PREFERENCES["CS"]))
@@ -36,7 +83,7 @@ def main():
     agents.append(Agent("Arya", "History", 0.2, STUDENT_PREFERENCES["History"]))
     agents.append(Agent("Ali", "CS", 0.7, STUDENT_PREFERENCES["CS"]))
 
-    ### MATPLOTLIB STUFF BELOW
+    # MATPLOTLIB STUFF BELOW
 
     # Scatter Map Visualisation 
 
@@ -58,6 +105,9 @@ def main():
 
     # Update function for animation
     def plot_update(frame):
+        if frame % 480 == 0:
+            map.clean()
+
         map.update()
         
         # Get agent locations for this frame
@@ -68,16 +118,21 @@ def main():
             y_data.append(lat)
         
         # Update scatter plot data
-        agent_scatter.set_offsets(list(zip(x_data, y_data)))
-        
-        return agent_scatter,
+        scat.set_offsets(list(zip(x_data, y_data)))
+
+        # Update the bar heights to reflect current stink levels
+        for j, building in enumerate(buildings):
+            bars[j].set_height(building.stink)
+
+        return (scat, *bars)
 
     map = Map(agents, buildings)
 
     print("STARTING SIMULATION\n\n")
 
     # Create animation
-    ani = animation.FuncAnimation(fig, plot_update, frames=1000, interval=100, blit=True)
+    ani = animation.FuncAnimation(
+        fig, plot_update, frames=480, interval=5, blit=False)
 
     plt.legend(loc="lower left")
     plt.show()
