@@ -43,6 +43,34 @@ fraser_to_rr =  [(55.873218, -4.288445),
                 (55.872674, -4.288206), 
                 (55.872346, -4.288193)]
 
+bo_to_jms = [(55.873498, -4.292804), 
+             (55.873311, -4.293180),
+             (55.873150, -4.292460)]
+
+jms_to_lib = [(55.873150, -4.292460),
+            (55.873010, -4.292456),
+            (55.872712, -4.291050), 
+            (55.872530, -4.289391),
+            (55.872807, -4.288762),
+            (55.873128, -4.288531),
+            (55.873323, -4.288474)]
+
+jms_to_fraser = [(55.873150, -4.292460),
+            (55.873010, -4.292456),
+            (55.872712, -4.291050), 
+            (55.872530, -4.289391),
+            (55.872807, -4.288762),
+            (55.873128, -4.288531),
+            (55.873218, -4.288445)]
+
+rr_to_jms = [(55.872346, -4.288193),
+            (55.872452, -4.289079),
+            (55.872521, -4.289712),
+            (55.872681, -4.290329),
+            (55.872889, -4.290934),
+            (55.873012, -4.291090),
+            (55.873137, -4.291259),
+            (55.873150, -4.292460)]
 
         
 paths = {
@@ -58,8 +86,17 @@ paths = {
     ("fraser building", "boyd orr"): bo_to_fraser[::-1],
     ("fraser building", "reading room"): fraser_to_rr,
     ("reading room", "fraser building"): fraser_to_rr[::-1],
+    ("boyd orr", "james mccune smith"): bo_to_jms,
+    ("james mccune smith", "boyd orr"): bo_to_jms[::-1],
+    ("james mccune smith", "library"): jms_to_lib,
+    ("library", "james mccune smith"): jms_to_lib[::-1],
+    ("james mccune smith", "fraser building"): jms_to_fraser,
+    ("fraser building", "james mccune smith"): jms_to_fraser[::-1],
+    ("reading room", "james mccune smith"): rr_to_jms,
+    ("james mccune smith", "reading room"): rr_to_jms[::-1],
     ("boyd orr", "boyd orr"): [(55.873498, -4.292804)],
     ("library", "library"): [(55.873323, -4.288474)],
     ("reading room", "reading room"): [(55.872346, -4.288193)],
-    ("fraser building", "fraser building"): [(55.873218, -4.288445)]
+    ("fraser building", "fraser building"): [(55.873218, -4.288445)],
+    ("james mccune smith", "james mccune smith"): [(55.873150, -4.292460)]
 }

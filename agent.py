@@ -48,7 +48,6 @@ class Agent():
                 self.target_location = self.get_next_location()
                 self.path = get_path(self.current_location.name, self.target_location.name)
                 print(f"{self.name} is moving from {self.current_location.name} to {self.target_location.name}")
-                print(f"Path: {self.path}")
                 return
             else:
                 self.time_studied +=1

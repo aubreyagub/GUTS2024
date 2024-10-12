@@ -12,14 +12,16 @@ def main():
     library = Building("library", 0.3, 0.2, (55.873323, -4.288474))
     reading_room = Building("reading room", 0.1, 0.3, (55.872346, -4.288193))
     fraser_building = Building("fraser building", 0.2, 0.1, (55.873218, -4.288445))
+    jms = Building("james mccune smith", 0.2, 0.1, (55.873150, -4.292460))
     buildings.append(boyd_orr)
     buildings.append(library)
     buildings.append(reading_room)
     buildings.append(fraser_building)
+    buildings.append(jms)
 
     STUDENT_PREFERENCES = {
-    "CS": ([boyd_orr, library, reading_room, fraser_building], [0.5, 0.3, 0.1, 0.1]),
-    "History": ([boyd_orr, library, reading_room, fraser_building], [0.1, 0.3, 0.4, 0.2]),
+    "CS": (buildings, [0.4, 0.3, 0.1, 0.1, 0.1]),
+    "History": (buildings, [0.1, 0.2, 0.4, 0.2, 0.1]),
 }
 
     agents = []
