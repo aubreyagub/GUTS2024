@@ -18,7 +18,7 @@
                         <div class="card">
                             <div class="card-header bg-info text-light">Funk Factor</div>
                             <div class="card-body">
-                                <div id="line-chart" style="width:100%;height:150px;"></div>
+                                <canvas id="line-chart" height="150"></canvas>
                             </div>
                         </div>
                     </div>
@@ -26,7 +26,7 @@
                         <div class="card">
                             <div class="card-header bg-warning text-light">Crowded and Clouded</div>
                             <div class="card-body">
-                                <div id="bar-chart" style="width:100%;height:150px;"></div>
+                                <canvas id="bar-chart" height="150"></canvas>
                             </div>
                         </div>
                     </div>
@@ -45,19 +45,11 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Include necessary scripts for MapLibre and Plotly -->
-<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-
-<!-- Load a stable version of Plotly from a reliable CDN -->
-<script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script> <!-- Using a stable version -->
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const MAPTILER_KEY = "{{ maptiler_key }}";
         const students = {};
 
-        // Initialize the map
         const map = new maplibregl.Map({
             container: 'map',
             style: `https://api.maptiler.com/maps/basic-v2/style.json?key=${MAPTILER_KEY}`,
@@ -84,30 +76,75 @@
             });
         });
 
-        // Initialize Plotly graphs
-        const lineChartLayout = {
-            title: 'Stink Factor Over Time',
-            xaxis: { title: 'Time (Minutes)', range: [0, 480] },
-            yaxis: { title: 'Stink Level', range: [0, 1] },
-        };
-        const lineChartData = [];
-        Plotly.newPlot('line-chart', lineChartData, lineChartLayout);
+        const lineCtx = document.getElementById('line-chart').getContext('2d');
+        const buildingStinkLevelGraph = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        beginAtZero: true,
+                        min: 0,        
+                        max: 480,      
+                        title: { display: true, text: 'Time (minutes)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        min: 0.0,      
+                        max: 1.0,     
+                        title: { display: true, text: 'Stink Level' },
+                        ticks: {
+                            stepSize: 0.1,
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
 
-        const barChartLayout = {
-            title: 'Building Fullness',
-            xaxis: { title: 'Buildings' },
-            yaxis: { title: 'Fullness', range: [0, 1] },
-        };
-        const barChartData = [{ x: [], y: [], type: 'bar' }];
-        Plotly.newPlot('bar-chart', barChartData, barChartLayout);
+        const barCtx = document.getElementById('bar-chart').getContext('2d');
+        const buildingFullnessBarChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Building Fullness',
+                    data: [],
+                    backgroundColor: ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#800080'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Buildings' }, ticks: {autoskip: true} },
+                    y: {
+                        beginAtZero: true,
+                        min: 0.0,      // Set the minimum y-value
+                        max: 1.0,      // Set the maximum y-value
+                        title: { display: true, text: 'Fullness' }
+                    }
+                }
+            }
+        });
 
-        // Socket.IO event listeners
+
         const socket = io();
         socket.on('new_student', data => addHtmlPointToMap(data.student_id, data.lat, data.lng, data.name, data.stinkLevel, data.poi));
         socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi));
         socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick, data.fullness));
 
-        // Function to add a point on the map for a new student
         function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi) {
             if (!students[studentId]) {
                 const point = document.createElement('div');
@@ -129,7 +166,6 @@
             updateBOBrigade();
         }
 
-        // Function to update the position of an existing student
         function updateHtmlPointOnMap(studentId, lat, lng, stinkLevel, poi) {
             if (students[studentId]) {
                 students[studentId].pointMarker.setLngLat([lng, lat]);
@@ -150,7 +186,6 @@
             }
         }
 
-        // Function to update the leaderboard (BO Brigade)
         function updateBOBrigade() {
             const listElement = document.getElementById('bo-brigade');
             listElement.innerHTML = '';
@@ -170,46 +205,47 @@
             });
         }
 
-        // Function to update the building data on the map and graphs
         function updateBuilding(buildingId, buildingName, lat, lng, stinkLevel, capacity, tick, fullness) {
-            updateLineChart(buildingName, tick, stinkLevel);
-            updateBarChart(buildingName, fullness);
+            console.log(`Received building update: ID=${buildingId}, Name=${buildingName}, Tick=${tick}, StinkLevel=${stinkLevel}`);
+
+            updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel);
+            updateBarChartWithBuildingData(buildingId, buildingName, fullness);
         }
 
-        // Update the line chart for stink levels
-        // For Line Chart:
-        function updateLineChart(buildingName, tick, stinkLevel) {
-            console.log('Updating Line Chart:', buildingName, tick, stinkLevel);
-            const traceIndex = lineChartData.findIndex(trace => trace.name === buildingName);
-            if (traceIndex !== -1) {
-                Plotly.extendTraces('line-chart', {
-                    x: [[tick]],
-                    y: [[stinkLevel]]
-                }, [traceIndex]);
+        function updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel) {
+            const buildingColours = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#800080'];
+            const colour = buildingColours[buildingId];
+
+            console.log(`Updating graph for building: ${buildingName}, Tick: ${tick}, StinkLevel: ${stinkLevel}`);
+
+            let dataset = buildingStinkLevelGraph.data.datasets.find(dataset => dataset.label === buildingName);
+
+            if (dataset) {
+                dataset.data.push({ x: tick, y: stinkLevel });
             } else {
-                const newTrace = {
-                    x: [tick],
-                    y: [stinkLevel],
-                    mode: 'lines',
-                    name: buildingName,
-                    line: { shape: 'linear' }
-                };
-                Plotly.addTraces('line-chart', newTrace);
-                lineChartData.push(newTrace);
+                buildingStinkLevelGraph.data.datasets.push({
+                    label: buildingName,
+                    data: [{ x: Number(tick), y: Number(stinkLevel) }],
+                    borderColor: colour,
+                    fill: false,
+                    borderWidth: 2
+                });
             }
+
+            buildingStinkLevelGraph.update();  
         }
 
-        // For Bar Chart:
-        function updateBarChart(buildingName, fullness) {
-            console.log('Updating Bar Chart:', buildingName, fullness);
-            const index = barChartData[0].x.indexOf(buildingName);
+        function updateBarChartWithBuildingData(buildingId, buildingName, fullness) {
+            let index = buildingFullnessBarChart.data.labels.indexOf(buildingName);
+
             if (index === -1) {
-                barChartData[0].x.push(buildingName);
-                barChartData[0].y.push(fullness);
+                buildingFullnessBarChart.data.labels.push(buildingName);
+                buildingFullnessBarChart.data.datasets[0].data.push(fullness);
             } else {
-                barChartData[0].y[index] = fullness;
+                buildingFullnessBarChart.data.datasets[0].data[index] = fullness;
             }
-            Plotly.react('bar-chart', barChartData, barChartLayout);
+
+            buildingFullnessBarChart.update();
         }
 
     });

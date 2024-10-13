@@ -154,7 +154,7 @@ def main():
                     'fullness' : float(building.fullness)
                 })
 
-            time.sleep(0.5)
+            time.sleep(0.25)
 
 if __name__ == "__main__":
     simulation_thread = threading.Thread(target=main)
