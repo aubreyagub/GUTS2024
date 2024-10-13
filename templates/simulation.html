@@ -136,7 +136,7 @@
         const listElement = document.getElementById('bo-brigade');
         listElement.innerHTML = '';
 
-        const sortedStudents = Object.values(students).sort((a, b) => b.stinkLevel - a.stinkLevel);
+        const sortedStudents = Object.values(students).sort((a, b) => b.stinkLevel - a.stinkLevel).slice(0, 10);
         sortedStudents.forEach((student, index) => 
         {
             const listItem = document.createElement('li');

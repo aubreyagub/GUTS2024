@@ -136,4 +136,3 @@ if __name__ == "__main__":
     simulation_thread.start()
 
     socketio.run(app, debug=True, port=PORT)
-    main()
