@@ -121,41 +121,44 @@ def main():
         for i in range(len(agents)):
             agent = simulation[0]["agents"][i]
             socketio.emit('new_student', {
-                'student_id': i, 
-                'lat': agent.current_coordinate[0], 
-                'lng': agent.current_coordinate[1], 
-                'name': agent.name, 
-                'stinkLevel': agent.stink, 
-                'poi': agent.poi
+                'student_id': int(i), 
+                'lat': float(agent.current_coordinate[0]), 
+                'lng': float(agent.current_coordinate[1]), 
+                'name': str(agent.name), 
+                'stinkLevel': float(round(agent.stink, 3)), 
+                'poi': bool(agent.poi)
             })
 
         for tick in simulation[1:]:
             # do post requests
             for i, agent in enumerate(tick["agents"]):
                 socketio.emit('update_student', {
-                    'student_id': i, 
-                    'lat': agent.current_coordinate[0], 
-                    'lng': agent.current_coordinate[1], 
-                    'stinkLevel': agent.stink, 
-                    'poi': agent.poi
+                    'student_id': int(i), 
+                    'lat': float(agent.current_coordinate[0]), 
+                    'lng': float(agent.current_coordinate[1]), 
+                    'stinkLevel': float(round(agent.stink, 3)), 
+                    'poi': bool(agent.poi)
                 })
 
             for i,building in enumerate(tick["buildings"].values()):
+                print(f"Emitting building update for {building.name.value}, Stink Level: {building.stink}")
+
                 socketio.emit('update_building', {
                     'building_id': i,
-                    'buildingName': building.name.value,
-                    'lat': building.coordinate[0],
-                    'lng': building.coordinate[1],
-                    'stinkLevel': building.stink,
-                    'capacity': building.capacity,
-                    'tick' : tick["tick_count"]
+                    'buildingName': str(building.name.value),
+                    'lat': float(building.coordinate[0]),
+                    'lng': float(building.coordinate[1]),
+                    'stinkLevel': float(round(building.stink, 3)),
+                    'capacity': str(building.capacity),
+                    'tick' : int(tick["tick_count"]),
+                    'fullness' : float(building.fullness)
                 })
 
-            time.sleep(0.25)
+            time.sleep(0.5)
 
 if __name__ == "__main__":
     simulation_thread = threading.Thread(target=main)
     simulation_thread.daemon = True  # Ensures thread exits when main program exits
     simulation_thread.start()
 
-    socketio.run(app, debug=True, port=PORT)
+    socketio.run(app, debug=False, port=PORT)
