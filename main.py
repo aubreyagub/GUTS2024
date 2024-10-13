@@ -48,7 +48,7 @@ def main():
         BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, (55.872346, -4.288193), 10),
         # BuildingName.ASBS: Building(BuildingName.ASBS, (), 10),
         BuildingName.LIBRARY: Building(BuildingName.LIBRARY, (55.873323, -4.288474), 25),
-        BuildingName.SHADOW_REALM: Building(BuildingName.SHADOW_REALM,(), math.inf)
+        BuildingName.SHADOW_REALM: Building(BuildingName.SHADOW_REALM, (0, 0), math.inf)
     }
 
     agents = [generate_student(buildings) for i in range(STUDENT_COUNT-1)]
@@ -109,11 +109,10 @@ def main():
         tick_count = 480
         print(f"Simulating {tick_count} ticks")
         simulation = []
-        agents_with_ids = {}
 
         for i in range(tick_count):
             map.update()
-            simulation.append({"agents": deepcopy(agents), "buildings": deepcopy(buildings)})
+            simulation.append({"agents": deepcopy(agents), "buildings": deepcopy(buildings), "tick_count": i})
 
         print(f"Simulation complete. {len(simulation)} ticks recorded")
 
@@ -121,12 +120,36 @@ def main():
 
         for i in range(len(agents)):
             agent = simulation[0]["agents"][i]
-            socketio.emit('new_student', {'student_id': i, 'lat': agent.current_coordinate[0], 'lng': agent.current_coordinate[1], 'name': agent.name, 'stinkLevel': agent.stink, 'poi': agent.poi})
+            socketio.emit('new_student', {
+                'student_id': i, 
+                'lat': agent.current_coordinate[0], 
+                'lng': agent.current_coordinate[1], 
+                'name': agent.name, 
+                'stinkLevel': agent.stink, 
+                'poi': agent.poi
+            })
 
         for tick in simulation[1:]:
             # do post requests
             for i, agent in enumerate(tick["agents"]):
-                socketio.emit('update_student', {'student_id': i, 'lat': agent.current_coordinate[0], 'lng': agent.current_coordinate[1], 'stinkLevel': agent.stink, 'poi': agent.poi})
+                socketio.emit('update_student', {
+                    'student_id': i, 
+                    'lat': agent.current_coordinate[0], 
+                    'lng': agent.current_coordinate[1], 
+                    'stinkLevel': agent.stink, 
+                    'poi': agent.poi
+                })
+
+            for i,building in enumerate(tick["buildings"].values()):
+                socketio.emit('update_building', {
+                    'building_id': i,
+                    'buildingName': building.name.value,
+                    'lat': building.coordinate[0],
+                    'lng': building.coordinate[1],
+                    'stinkLevel': building.stink,
+                    'capacity': building.capacity,
+                    'tick' : tick["tick_count"]
+                })
 
             time.sleep(0.25)
 
