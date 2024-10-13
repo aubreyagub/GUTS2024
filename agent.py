@@ -26,7 +26,7 @@ class Agent():
         self.natural_stink_rate = self.generate_natural_stink_rate()
         self.stink_factor = self.generate_stink_factor()
 
-        self.time_studied = 0.0
+        self.time_studied = 0.1
         self.stink = stink
 
         self.building_preferences = degree.BUILDING_PREFERENCE
@@ -84,10 +84,10 @@ class Agent():
             self.current_coordinate = self.path.pop(0)
         elif len(self.path) == 1:
             self.current_coordinate = self.path.pop()
-            self.current_location = self.target_location
         else:
-            # print("Path is empty")
-            return
+            building_entrance_coord = self.target_location.coordinate
+            self.current_coordinate = self.randomise_coordinate(building_entrance_coord)
+            self.current_location = self.target_location
 
     def get_path(self, start, end):
         path_key = (start,end)
@@ -113,3 +113,12 @@ class Agent():
             self.degree.STINK_THRESHOLD_DISTRIBUTION[0], self.degree.STINK_THRESHOLD_DISTRIBUTION[1])
         return clamp(stink_threshold)
 
+    def randomise_coordinate(self,coord):
+        # Unpack latitude and longitude
+        lat, lon = coord
+
+        # Modify the last two decimal places directly
+        new_lat = round(lat + random.uniform(-0.0003, 0.0003), 6)
+        new_lon = round(lon + random.uniform(-0.0005, 0.0005), 6)
+
+        return (new_lat, new_lon)

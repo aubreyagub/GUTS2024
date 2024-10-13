@@ -4,25 +4,39 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-9 map-section">
-            <div class="card card-map">
-                <div class="map-container" id="map"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-7 map-section">
+                <div class="card card-map">
+                    <div class="map-container" id="map"></div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-3 list-section">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card mb-3">
-                        <div class="card-header bg-success text-light">The BO Brigade</div>
-                        <ul class="list-group" id="bo-brigade"></ul>
+    
+            <div class="col-md-3 graph-section">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-light">Funk Factor</div>
+                            <div class="card-body">
+                                <canvas id="line-chart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="card">
+                            <div class="card-header bg-warning text-light">Crowded and Clouded</div>
+                            <div class="card-body">
+                                <canvas id="bar-chart" height="150"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-info text-light">Funk Factor</div>
-                        <div class="card-body"><canvas id="line-chart" height="150"></canvas></div>
-                    </div>
+            </div>
+    
+            <div class="col-md-2 list-section">
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-light">The BO Brigade</div>
+                    <ul class="list-group" id="bo-brigade"></ul>
                 </div>
             </div>
         </div>
@@ -32,9 +46,36 @@
 
 {% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+   document.addEventListener('DOMContentLoaded', function () {
     const MAPTILER_KEY = "{{ maptiler_key }}";
     const students = {};
+
+    // Function to interpolate between two colors based on a factor
+    function interpolateColor(color1, color2, factor) {
+        if (arguments.length < 3) { factor = 0.5; }
+        const result = color1.slice();
+        for (let i = 0; i < 3; i++) {
+            result[i] = Math.round(result[i] + factor * (color2[i] - result[i]));
+        }
+        return result;
+    }
+
+    function hexToRgb(hex) {
+        const bigint = parseInt(hex.slice(1), 16);
+        return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+    }
+
+    function rgbToHex(rgb) {
+        return `#${rgb.map(x => x.toString(16).padStart(2, '0')).join('')}`;
+    }
+
+    // Updated getStinkColor function
+    function getStinkColor(stinkLevel) {
+        const color1 = hexToRgb('#ADD8E6');  // Light Blue
+        const color2 = hexToRgb('#006400');  // Dark Green
+        const interpolatedColor = interpolateColor(color1, color2, stinkLevel);
+        return rgbToHex(interpolatedColor);
+    }
 
     const map = new maplibregl.Map({
         container: 'map',
@@ -78,17 +119,52 @@
         }
     });
 
+    const barCtx = document.getElementById('bar-chart').getContext('2d');
+    const buildingFullnessBarChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Building Fullness',
+                data: [],
+                backgroundColor: ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#800080'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Buildings' }, ticks: {autoskip: true} },
+                y: {
+                    beginAtZero: true,
+                    min: 0.0,      
+                    max: 1.0, 
+                    title: { display: true, text: 'Fullness' }
+                }
+            }
+        }
+    });
+
     const socket = io();
     socket.on('new_student', data => addHtmlPointToMap(data.student_id, data.lat, data.lng, data.name, data.stinkLevel, data.poi, data.time_studied));
     socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi, data.time_studied));
-    socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick));
+    socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick, data.fullness));
 
+    // In addHtmlPointToMap function
     function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi, time_studied) 
     {
         if (!students[studentId])
         {
             const point = document.createElement('div');
             point.className = 'map-point';
+            // Set size and style inline to ensure visibility and avoid CSS overrides
+            point.style.width = '20px';
+            point.style.height = '20px';
+            point.style.borderRadius = '50%';
+            // Remove the white border
+            // point.style.border = '2px solid white';
+            point.style.backgroundColor = getStinkColor(stinkLevel); // Set color based on stink level
+
             const pointMarker = new maplibregl.Marker({ element: point, anchor: 'center' }).setLngLat([lng, lat]).addTo(map);
         
             let labelMarker = null;
@@ -107,11 +183,14 @@
         updateBOBrigade();
     }
 
+    // In updateHtmlPointOnMap function
     function updateHtmlPointOnMap(studentId, lat, lng, stinkLevel, poi, time_studied)
     {
         if (students[studentId])
         {
             students[studentId].pointMarker.setLngLat([lng, lat]);
+            const point = students[studentId].pointMarker.getElement();
+            point.style.backgroundColor = getStinkColor(stinkLevel); // Update color based on stink level
             
             if (students[studentId].labelMarker)
             {
@@ -122,7 +201,7 @@
                 const label = document.createElement('div');
                 label.className = 'map-label';
                 label.innerText = `${students[studentId].name}`;
-               
+            
                 students[studentId].labelMarker = new maplibregl.Marker({ element: label, anchor: 'top', offset: [0, 5] }).setLngLat([lng, lat]).addTo(map);
             }
             
@@ -159,9 +238,10 @@
         });
     }
 
-    function updateBuilding(buildingId, buildingName, lat, lng, stinkLevel, capacity, tick) {
+    function updateBuilding(buildingId, buildingName, lat, lng, stinkLevel, capacity, tick, fullness) {
         console.log(`Updating building: ${buildingId}, Tick: ${tick}, StinkLevel: ${stinkLevel}`);
         updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel);
+        updateBarChartWithBuildingData(buildingId, buildingName, fullness);
     }
 
     function updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel) {
@@ -185,6 +265,18 @@
         buildingStinkLevelGraph.update();
     }
 
+    function updateBarChartWithBuildingData(buildingId, buildingName, fullness) {
+        let index = buildingFullnessBarChart.data.labels.indexOf(buildingName);
+
+        if (index === -1) {
+            buildingFullnessBarChart.data.labels.push(buildingName);
+            buildingFullnessBarChart.data.datasets[0].data.push(fullness);
+        } else {
+            buildingFullnessBarChart.data.datasets[0].data[index] = fullness;
+        }
+
+        buildingFullnessBarChart.update();
+    }
 
 });
 </script>
