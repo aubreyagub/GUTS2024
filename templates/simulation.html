@@ -46,9 +46,36 @@
 
 {% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+   document.addEventListener('DOMContentLoaded', function () {
     const MAPTILER_KEY = "{{ maptiler_key }}";
     const students = {};
+
+    // Function to interpolate between two colors based on a factor
+    function interpolateColor(color1, color2, factor) {
+        if (arguments.length < 3) { factor = 0.5; }
+        const result = color1.slice();
+        for (let i = 0; i < 3; i++) {
+            result[i] = Math.round(result[i] + factor * (color2[i] - result[i]));
+        }
+        return result;
+    }
+
+    function hexToRgb(hex) {
+        const bigint = parseInt(hex.slice(1), 16);
+        return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+    }
+
+    function rgbToHex(rgb) {
+        return `#${rgb.map(x => x.toString(16).padStart(2, '0')).join('')}`;
+    }
+
+    // Updated getStinkColor function
+    function getStinkColor(stinkLevel) {
+        const color1 = hexToRgb('#ADD8E6');  // Light Blue
+        const color2 = hexToRgb('#006400');  // Dark Green
+        const interpolatedColor = interpolateColor(color1, color2, stinkLevel);
+        return rgbToHex(interpolatedColor);
+    }
 
     const map = new maplibregl.Map({
         container: 'map',
@@ -123,12 +150,21 @@
     socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi, data.time_studied));
     socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick, data.fullness));
 
+    // In addHtmlPointToMap function
     function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi, time_studied) 
     {
         if (!students[studentId])
         {
             const point = document.createElement('div');
             point.className = 'map-point';
+            // Set size and style inline to ensure visibility and avoid CSS overrides
+            point.style.width = '20px';
+            point.style.height = '20px';
+            point.style.borderRadius = '50%';
+            // Remove the white border
+            // point.style.border = '2px solid white';
+            point.style.backgroundColor = getStinkColor(stinkLevel); // Set color based on stink level
+
             const pointMarker = new maplibregl.Marker({ element: point, anchor: 'center' }).setLngLat([lng, lat]).addTo(map);
         
             let labelMarker = null;
@@ -147,11 +183,14 @@
         updateBOBrigade();
     }
 
+    // In updateHtmlPointOnMap function
     function updateHtmlPointOnMap(studentId, lat, lng, stinkLevel, poi, time_studied)
     {
         if (students[studentId])
         {
             students[studentId].pointMarker.setLngLat([lng, lat]);
+            const point = students[studentId].pointMarker.getElement();
+            point.style.backgroundColor = getStinkColor(stinkLevel); // Update color based on stink level
             
             if (students[studentId].labelMarker)
             {
@@ -162,7 +201,7 @@
                 const label = document.createElement('div');
                 label.className = 'map-label';
                 label.innerText = `${students[studentId].name}`;
-               
+            
                 students[studentId].labelMarker = new maplibregl.Marker({ element: label, anchor: 'top', offset: [0, 5] }).setLngLat([lng, lat]).addTo(map);
             }
             
