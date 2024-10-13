@@ -6,20 +6,113 @@
 <div class="container mt-4">
     <h1>Formulae</h1>
     <div class="row">
+        <!-- Left Column -->
         <div class="col-md-6">
+            <!-- Agent Stink Update -->
             <div class="card mb-3">
-                <div class="card-header bg-primary text-white">formula 1</div>
-                <div class="card-body"><p class="card-text">\[ a^2 + b^2 = c^2 \]</p></div>
+                <div class="card-header bg-primary text-white">Agent Stink Update</div>
+                <div class="card-body">
+                    <p class="card-text">At each time step, the agent's stink level is updated as follows:</p>
+                    <p class="card-text">\[ S_a^{t+1} = \min\left(1.0, S_a^{t} + \rho_a \right) \]</p>
+                    <p class="card-text">
+                        Where:
+                    <ul>
+                        <li>\( S_a^{t} \): Agent's stink level at time \( t \)</li>
+                        <li>\( \rho_a \): Agent's natural stink rate</li>
+                    </ul>
+                    </p>
+                </div>
             </div>
+            <!-- Environmental Stink Influence -->
             <div class="card mb-3">
-                <div class="card-header bg-secondary text-white">formula 2</div>
-                <div class="card-body"><p class="card-text">\[ V = IR \]</p></div>
+                <div class="card-header bg-secondary text-white">Environmental Stink Influence</div>
+                <div class="card-body">
+                    <p class="card-text">If the agent is in their target building and \( S_b^{t} > S_a^{t} \), the agent
+                        absorbs some of the building's stink:</p>
+                    <p class="card-text">\[ \Delta S_{\text{env}} = \phi_a \times \left( \frac{1}{1 + e^{S_a^{t} -
+                        S_b^{t}}} \right) \]</p>
+                    <p class="card-text">
+                        Where:
+                    <ul>
+                        <li>\( \phi_a \): Agent's stink factor (sensitivity to environmental stink)</li>
+                        <li>\( S_b^{t} \): Building's stink level at time \( t \)</li>
+                    </ul>
+                    </p>
+                    <p class="card-text">The agent's stink is then updated:</p>
+                    <p class="card-text">\[ S_a^{t+1} = \min\left(1.0, S_a^{t+1} + \Delta S_{\text{env}} \right) \]</p>
+                </div>
+            </div>
+            <!-- Agent Movement Decision -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">Agent Movement Decision</div>
+                <div class="card-body">
+                    <p class="card-text">An agent considers moving if the following conditions are met:</p>
+                    <p class="card-text">\[ \text{Perceived Stink} = S_b^{t} - S_a^{t} \]</p>
+                    <p class="card-text">
+                        And:
+                        \[ \text{Perceived Stink} > 0,\quad S_b^{t} > \theta_a,\quad T_{\text{in\_building}} > \theta_a
+                        \times \tau \]
+                    </p>
+                    <p class="card-text">
+                        Where:
+                    <ul>
+                        <li>\( \theta_a \): Agent's stink threshold</li>
+                        <li>\( T_{\text{in\_building}} \): Time the agent has spent in the current building</li>
+                        <li>\( \tau \): Scaling factor (set to 20 in our code)</li>
+                    </ul>
+                    </p>
+                </div>
             </div>
         </div>
+        <!-- Right Column -->
         <div class="col-md-6">
+            <!-- Building Fullness -->
             <div class="card mb-3">
-                <div class="card-header bg-success text-white">formula 3</div>
-                <div class="card-body"><p class="card-text">\[ x = abc \]</p></div>
+                <div class="card-header bg-danger text-white">Building Fullness</div>
+                <div class="card-body">
+                    <p class="card-text">The building's fullness is calculated as:</p>
+                    <p class="card-text">\[ F_b^{t} = \frac{N_b^{t}}{C_b} \]</p>
+                    <p class="card-text">
+                        Where:
+                    <ul>
+                        <li>\( N_b^{t} \): Number of agents inside building \( b \) at time \( t \)</li>
+                        <li>\( C_b \): Building's capacity</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+            <!-- Building Stink Update -->
+            <div class="card mb-3">
+                <div class="card-header bg-warning text-white">Building Stink Update</div>
+                <div class="card-body">
+                    <p class="card-text">Accumulated stink contributed by agents:</p>
+                    <p class="card-text">\[ \text{Accumulated Stink} = \left( \sum_{a \in A_b^{t}} S_a^{t} \right)
+                        \times \alpha_b \times F_b^{t} \]</p>
+                    <p class="card-text">The building's stink is then updated:</p>
+                    <p class="card-text">\[ S_b^{t+1} = \min\left(1.0, \max\left(0, S_b^{t} \times (1 - \delta_b) +
+                        \text{Accumulated Stink} \right) \right) \]</p>
+                    <p class="card-text">
+                        Where:
+                    <ul>
+                        <li>\( \alpha_b \): Building's stink accumulation rate</li>
+                        <li>\( \delta_b \): Building's stink dissipation rate</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+            <!-- Clamping Function -->
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">Clamping Function</div>
+                <div class="card-body">
+                    <p class="card-text">To ensure stink levels remain within realistic bounds, we apply the clamping
+                        function:</p>
+                    <p class="card-text">
+                        \[ \text{Clamped Stink} = \begin{cases}
+                        0 & \text{if } \text{Stink} < 0 \\ \text{Stink} & \text{if } 0 \leq \text{Stink} \leq 1 \\ 1 &
+                            \text{if } \text{Stink}> 1
+                            \end{cases} \]
+                    </p>
+                </div>
             </div>
         </div>
     </div>
