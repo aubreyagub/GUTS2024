@@ -38,6 +38,28 @@ def create_student():
 
     return jsonify({'student_id': student_id})
 
+@app.route('/create_students', methods=['POST'])
+def create_students():
+    global student_id_counter
+    
+    data = request.json
+
+    for student in data:
+    
+        lat = student['lat']
+        lng = student['lng']
+        name = student.get('name', f'Student {student_id_counter}')
+        stink_level = student.get('stinkLevel', 1)
+        poi = student.get('poi', False)
+        student_id = f"student-{student_id_counter}"
+        
+        students[student_id] = {'lat': lat, 'lng': lng, 'name': name, 'stinkLevel': stink_level, 'poi': poi}
+        student_id_counter += 1
+        
+        socketio.emit('new_student', {'student_id': student_id, 'lat': lat, 'lng': lng, 'name': name, 'stinkLevel': stink_level, 'poi': poi})
+
+    return jsonify({'student_id': student_id})
+
 @app.route('/update_student/<student_id>', methods=['POST'])
 def update_student(student_id):
     if student_id not in students:

@@ -1,4 +1,5 @@
 from agent import Agent
+from flask import Flask, render_template, jsonify, request
 from building import Building
 from map import Map
 from enum import Enum
@@ -6,15 +7,33 @@ import random
 from degrees import *
 import requests
 from copy import deepcopy
+from flask import Flask
+from flask_socketio import SocketIO, emit
+import threading
+
+from frontend.maptiler_key import MAPTILER_KEY
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import math
 
-DEBUG = True
+import time
+
+DEBUG = False
 STUDENT_COUNT = 50
-URL = "192.168.1.253"
-PORT = "3069"
+PORT = 5000
+student_id_counter = 0
+
+app = Flask(__name__)
+socketio = SocketIO(app)
+
+@app.route('/')
+def index():
+    return render_template('simulation.html', maptiler_key=MAPTILER_KEY, active_page='simulation')
+
+@app.route('/formulae')
+def formulae():
+    return render_template('formulae.html', active_page='formulae')
 
 def generate_student(buildings):
     name = "A"
@@ -33,7 +52,7 @@ def main():
     }
 
     agents = [generate_student(buildings) for i in range(STUDENT_COUNT-1)]
-    agents.append(Agent("STINKY MCGEE", ComputerScience, buildings, stink=0.0))
+    agents.append(Agent("STINKY MCGEE", ComputerScience, buildings, stink=0.5, poi=True))
 
     map = Map(agents, buildings)
     # MATPLOTLIB STUFF BELOW
@@ -51,7 +70,7 @@ def main():
         
         # Plot buildings as fixed points
         for building in buildings.values():
-            print(building.name)
+            # print(building.name)
             if building.name != BuildingName.SHADOW_REALM: # do not display shadow realm on map as it is not a single point
                 ax.plot(building.coordinate[1], building.coordinate[0], "ro", markersize=8, label=building.name)
 
@@ -86,9 +105,11 @@ def main():
 
     else:
         # SEND POST REQUESTS
-        tick_count = int(input("How many ticks? "))
+        # tick_count = int(input("How many ticks? "))
+        tick_count = 480
         print(f"Simulating {tick_count} ticks")
         simulation = []
+        agents_with_ids = {}
 
         for i in range(tick_count):
             map.update()
@@ -96,12 +117,23 @@ def main():
 
         print(f"Simulation complete. {len(simulation)} ticks recorded")
 
-        # do post requests
-        endpoint = f"{URL}:{PORT}"
-        data = {
+        time.sleep(5)
 
-        }
-        requests.post(endpoint, json=data)
+        for i in range(len(agents)):
+            agent = simulation[0]["agents"][i]
+            socketio.emit('new_student', {'student_id': i, 'lat': agent.current_coordinate[0], 'lng': agent.current_coordinate[1], 'name': agent.name, 'stinkLevel': agent.stink, 'poi': agent.poi})
+
+        for tick in simulation[1:]:
+            # do post requests
+            for i, agent in enumerate(tick["agents"]):
+                socketio.emit('update_student', {'student_id': i, 'lat': agent.current_coordinate[0], 'lng': agent.current_coordinate[1], 'stinkLevel': agent.stink, 'poi': agent.poi})
+
+            time.sleep(0.25)
 
 if __name__ == "__main__":
+    simulation_thread = threading.Thread(target=main)
+    simulation_thread.daemon = True  # Ensures thread exits when main program exits
+    simulation_thread.start()
+
+    socketio.run(app, debug=True, port=PORT)
     main()
