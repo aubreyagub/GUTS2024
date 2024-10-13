@@ -17,7 +17,7 @@ class ComputerScience(Degree):
         BuildingName.FRASER_BUILDING: 0.0,
         BuildingName.LIBRARY: 0.3,
         BuildingName.READING_ROOM: 0.1,
-        # BuildingName.ASBS: 0.0,
+        BuildingName.ASBS: 0.0,
         BuildingName.SHADOW_REALM: 0.0
     }
 
@@ -33,8 +33,8 @@ class Business(Degree):
         BuildingName.JMS: 0.0,
         BuildingName.FRASER_BUILDING: 0.0,
         BuildingName.LIBRARY: 0.3,
-        BuildingName.READING_ROOM: 0.6,
-        # BuildingName.ASBS: 0.0,
+        BuildingName.READING_ROOM: 0.0,
+        BuildingName.ASBS: 0.6,
         BuildingName.SHADOW_REALM: 0.0
     }
 
@@ -51,7 +51,7 @@ class History(Degree):
         BuildingName.FRASER_BUILDING: 0.0,
         BuildingName.LIBRARY: 0.3,
         BuildingName.READING_ROOM: 0.6,
-        # BuildingName.ASBS: 0.0,
+        BuildingName.ASBS: 0.0,
         BuildingName.SHADOW_REALM: 0.0
     }
 

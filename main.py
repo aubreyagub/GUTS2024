@@ -20,7 +20,7 @@ def main():
         BuildingName.JMS: Building(BuildingName.JMS, (55.873150, -4.292460), 10),
         BuildingName.FRASER_BUILDING: Building(BuildingName.FRASER_BUILDING,(55.873218, -4.288445), 10),
         BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, (55.872346, -4.288193), 10),
-        # BuildingName.ASBS: Building(BuildingName.ASBS, (), 10),
+        BuildingName.ASBS: Building(BuildingName.ASBS, (55.870739, -4.295667), 10),
         BuildingName.LIBRARY: Building(BuildingName.LIBRARY, (55.873323, -4.288474), 25),
         BuildingName.SHADOW_REALM: Building(BuildingName.SHADOW_REALM,(), math.inf)
     }
@@ -37,7 +37,7 @@ def main():
     ax.set_ylabel("Latitude")
     
     # Set plot boundaries (adjust based on actual coordinates)
-    ax.set_xlim(-4.295, -4.285)
+    ax.set_xlim(-4.297, -4.285)
     ax.set_ylim(55.870, 55.875)
     
     # Plot buildings as fixed points
