@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Landing{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2>Hygiene Survey</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Name Input Section -->
+                    <div id="nameForm" class="text-center mb-4">
+                        <label for="nameInput" class="form-label">What's your name?</label>
+                        <input type="text" id="nameInput" class="form-control form-control-lg mb-3"
+                            placeholder="Enter your name" required>
+                        <button id="nameSubmitButton" class="btn btn-primary btn-lg">Start Survey</button>
+                    </div>
+
+                    <!-- Question Form Section (Initially Hidden) -->
+                    <div id="questionForm" class="question-block active" style="display:none;">
+                        <div id="currentQuestion" class="text-center mb-4">
+                            <!-- Questions will be inserted here -->
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button id="yesButton" class="btn btn-lg btn-success me-3">Yes</button>
+                            <button id="noButton" class="btn btn-lg btn-danger">No</button>
+                        </div>
+                    </div>
+
+                    <!-- Result Section (Hidden initially) -->
+                    <div id="resultBlock" class="result-block mt-5" style="display:none;">
+                        <h4 class="text-center">Survey Results</h4>
+                        <div class="results-container">
+                            <p><strong>Did you shower today?</strong> <span id="showerResult"></span></p>
+                            <p><strong>Did you use soap?</strong> <span id="soapResult"></span></p>
+                            <p><strong>Did you wash your hair?</strong> <span id="hairResult"></span></p>
+                            <p><strong>Did you dry off?</strong> <span id="dryResult"></span></p>
+                            <p><strong>Did you apply deodorant?</strong> <span id="deodorantResult"></span></p>
+                            <hr>
+                            <div class="text-center">
+                                <h5><span id="nameDisplay"></span>, your Stink Score is: <span id="stinkScore"
+                                        class="text-danger"></span></h5>
+                                <h5 id="stinkMessage" class="mt-4"></h5> <!-- Placeholder for the stink message -->
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button onclick="window.location.reload();" class="btn btn-secondary btn-lg">Take
+                                Again</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let currentQuestionIndex = 0;
+        let userName = ''; // Variable to store user's name
+        const questions = [
+            { id: 'shower', question: 'Did you shower today?', weight: 1.0 },  // Shower determines if score is 1 right away
+            { id: 'soap', question: 'Did you use soap?', weight: 0.4 },
+            { id: 'hair', question: 'Did you wash your hair?', weight: 0.2 },
+            { id: 'dry', question: 'Did you dry off?', weight: 0.1 },
+            { id: 'deodorant', question: 'Did you apply deodorant?', weight: 0.3 }
+        ];
+
+        const answers = {};
+        let stinkScore = 0;
+        let skippedShower = false; // Track if shower was skipped
+
+        const stinkMessages = [
+            "You have a stink of 0.00 – squeaky clean! You smell like fresh laundry on a spring day.",
+            "You have a stink of 0.01 – almost spotless. A little fresh, but nobody’s complaining.",
+            "You have a stink of 0.02 – you’re pretty clean, with a hint of freshness.",
+            "You have a stink of 0.03 – there's a faint whiff of soap still in the air.",
+            "You have a stink of 0.04 – minor hints of body spray, but you’re good to go.",
+            "You have a stink of 0.05 – so fresh and so clean, but not quite perfect.",
+            "You have a stink of 0.06 – you’re still fine, just a shadow of something there.",
+            "You have a stink of 0.07 – mild trace of exertion, but no issues here.",
+            "You have a stink of 0.08 – a little lived-in, but nothing offensive.",
+            "You have a stink of 0.09 – a tiny bit of funk, but you pass the sniff test.",
+            "You have a stink of 0.10 – you’re clean, but there’s a very slight musk.",
+            "You have a stink of 0.11 – a bit musky, but still acceptable.",
+            "You have a stink of 0.12 – the gym is calling you, but you’re not there yet.",
+            "You have a stink of 0.13 – you’re almost at the point where a shower would be good.",
+            "You have a stink of 0.14 – a slight sheen of sweat, but nothing too bad.",
+            "You have a stink of 0.15 – you’re just on the verge of needing a shower.",
+            "You have a stink of 0.16 – your deodorant is doing its job... barely.",
+            "You have a stink of 0.17 – you could freshen up a bit.",
+            "You have a stink of 0.18 – the air is getting thick, maybe a quick wash?",
+            "You have a stink of 0.19 – you’re in the ‘still clean but barely’ category.",
+            "You have a stink of 0.20 – a light layer of sweat, but you're not too bad.",
+            "You have a stink of 0.21 – you're starting to have a bit of an aura.",
+            "You have a stink of 0.22 – not terrible, but definitely noticeable now.",
+            "You have a stink of 0.23 – you’re on the verge of needing some soap.",
+            "You have a stink of 0.24 – people are starting to notice a little.",
+            "You have a stink of 0.25 – a faint body odor is starting to emerge.",
+            "You have a stink of 0.26 – there’s a light odor developing.",
+            "You have a stink of 0.27 – you might want to check yourself in the mirror.",
+            "You have a stink of 0.28 – deodorant could use a touch-up.",
+            "You have a stink of 0.29 – people are starting to glance away.",
+            "You have a stink of 0.30 – not offensive, but definitely not fresh.",
+            "You have a stink of 0.31 – it’s time for a shower soon.",
+            "You have a stink of 0.32 – you're starting to raise a few eyebrows.",
+            "You have a stink of 0.33 – someone just handed you gum, but for your body.",
+            "You have a stink of 0.34 – it's still manageable, but a shower would be wise.",
+            "You have a stink of 0.35 – you’re borderline noticeable.",
+            "You have a stink of 0.36 – the air around you is getting thicker.",
+            "You have a stink of 0.37 – your personal space might not be so pleasant now.",
+            "You have a stink of 0.38 – people are starting to take a step back.",
+            "You have a stink of 0.39 – your funk is becoming undeniable.",
+            "You have a stink of 0.40 – it’s time to face the fact that you need a shower.",
+            "You have a stink of 0.41 – people are holding their breath near you.",
+            "You have a stink of 0.42 – you're approaching hazardous territory.",
+            "You have a stink of 0.43 – friends are starting to avoid hugs.",
+            "You have a stink of 0.44 – body odor is part of your presence now.",
+            "You have a stink of 0.45 – there’s a noticeable cloud around you.",
+            "You have a stink of 0.46 – you’re a bit ripe at this point.",
+            "You have a stink of 0.47 – someone is cracking a window.",
+            "You have a stink of 0.48 – it’s getting tough to stand near you.",
+            "You have a stink of 0.49 – deodorant has failed you.",
+            "You have a stink of 0.50 – people are inching away now.",
+            "You have a stink of 0.51 – you’re officially stinky.",
+            "You have a stink of 0.52 – your smell is becoming the conversation topic.",
+            "You have a stink of 0.53 – the room is feeling smaller around you.",
+            "You have a stink of 0.54 – someone just sprayed air freshener.",
+            "You have a stink of 0.55 – there’s a clear radius around you now.",
+            "You have a stink of 0.56 – people are giving you ‘the look’.",
+            "You have a stink of 0.57 – the funk is now very real.",
+            "You have a stink of 0.58 – you’re borderline offensive.",
+            "You have a stink of 0.59 – people are regretting standing near you.",
+            "You have a stink of 0.60 – air is thick around you. Wash up.",
+            "You have a stink of 0.61 – you're close to gag-inducing territory.",
+            "You have a stink of 0.62 – your smell precedes you.",
+            "You have a stink of 0.63 – the funk is spreading.",
+            "You have a stink of 0.64 – it’s officially unpleasant to be near you.",
+            "You have a stink of 0.65 – people are avoiding you altogether.",
+            "You have a stink of 0.66 – your presence is known... by your smell.",
+            "You have a stink of 0.67 – you are now the smelly person in the room.",
+            "You have a stink of 0.68 – people are clearing out.",
+            "You have a stink of 0.69 – it’s getting unbearable to be around you.",
+            "You have a stink of 0.70 – the funk is getting overwhelming.",
+            "You have a stink of 0.71 – you're reaching hazardous levels of stench.",
+            "You have a stink of 0.72 – deodorant can't save you now.",
+            "You have a stink of 0.73 – people are whispering... about your smell.",
+            "You have a stink of 0.74 – it’s officially nasty at this point.",
+            "You have a stink of 0.75 – people are visibly gagging.",
+            "You have a stink of 0.76 – you're a walking biohazard.",
+            "You have a stink of 0.77 – it’s hard to breathe around you.",
+            "You have a stink of 0.78 – people are leaving the room.",
+            "You have a stink of 0.79 – your funk has its own gravitational field.",
+            "You have a stink of 0.80 – you are now a health concern.",
+            "You have a stink of 0.81 – the room is completely empty now.",
+            "You have a stink of 0.82 – you should apologize to everyone around you.",
+            "You have a stink of 0.83 – people are starting to text others about you.",
+            "You have a stink of 0.84 – the smell is now intolerable.",
+            "You have a stink of 0.85 – you are officially unbearable.",
+            "You have a stink of 0.86 – you should be legally required to shower.",
+            "You have a stink of 0.87 – it’s hard to be around you now.",
+            "You have a stink of 0.88 – your funk is now a public health risk.",
+            "You have a stink of 0.89 – people are calling hazmat teams.",
+            "You have a stink of 0.90 – you smell worse than a garbage truck.",
+            "You have a stink of 0.91 – you’re leaving a trail of funk behind.",
+            "You have a stink of 0.92 – you smell like a gym sock soaked in vinegar.",
+            "You have a stink of 0.93 – it’s unbearable to be in the same room as you.",
+            "You have a stink of 0.94 – you’ve reached biological hazard levels.",
+            "You have a stink of 0.95 – even animals are running from you.",
+            "You have a stink of 0.96 – people are donning gas masks near you.",
+            "You have a stink of 0.97 – your stench is now legendary.",
+            "You have a stink of 0.98 – you are single-handedly ruining the air quality.",
+            "You have a stink of 0.99 – congratulations, you are the smelliest human alive.",
+            "You have a stink of 1.00 – you smell like death itself. Immediate intervention required."
+        ];
+
+
+        // Handle name submission and start the survey
+        document.getElementById('nameSubmitButton').addEventListener('click', function () {
+            const nameInput = document.getElementById('nameInput').value.trim();
+            if (nameInput) {
+                userName = nameInput; // Store user's name
+                document.getElementById('nameForm').style.display = 'none'; // Hide the name input form
+                document.getElementById('questionForm').style.display = 'block'; // Show the survey questions
+                showNextQuestion();
+            } else {
+                alert("Please enter your name.");
+            }
+        });
+
+        // Function to show the next question
+        function showNextQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const questionData = questions[currentQuestionIndex];
+                document.getElementById('currentQuestion').innerHTML = `
+                    <h4>${questionData.question}</h4>
+                `;
+            } else {
+                calculateStinkScore(); // Calculate and display stink score after the last question
+                displayResults();
+            }
+        }
+
+        // Handle button clicks
+        document.getElementById('yesButton').addEventListener('click', function () {
+            handleAnswer('Yes');
+        });
+
+        document.getElementById('noButton').addEventListener('click', function () {
+            handleAnswer('No');
+        });
+
+        function handleAnswer(answer) {
+            const questionData = questions[currentQuestionIndex];
+
+            if (currentQuestionIndex === 0 && answer === 'No') {
+                // If they didn't shower, they get an instant stink score of 1
+                skippedShower = true;
+                stinkScore = 1;
+                displayResults(); // Skip remaining questions
+            } else {
+                // For all other questions, store the answer and calculate stink score
+                answers[questionData.id] = answer;
+
+                if (answer === 'No' && !skippedShower) {
+                    // Only adjust stink score if they didn't skip the shower
+                    stinkScore += questionData.weight + randomVariation();
+                }
+
+                currentQuestionIndex++;
+                showNextQuestion(); // Move to the next question or show results
+            }
+        }
+
+        // Calculate a random variation between -0.05 and +0.05
+        function randomVariation() {
+            return (Math.random() * 0.1) - 0.05;
+        }
+
+        // Calculate and display the stink score
+        function calculateStinkScore() {
+            if (!skippedShower) {
+                // Scale stink score based on only the remaining 4 questions if they did shower
+                stinkScore = (stinkScore / 1.0) + randomVariation();
+            }
+
+            // Clamp the stink score between 0 and 1
+            stinkScore = Math.min(1, Math.max(0, stinkScore.toFixed(2)));
+        }
+
+        // Display the results in the result block
+        function displayResults() {
+            document.getElementById('questionForm').style.display = 'none';
+            document.getElementById('resultBlock').style.display = 'block';
+
+            // Populate result fields with appropriate question results
+            document.getElementById('showerResult').textContent = answers['shower'] || 'No';
+            document.getElementById('soapResult').textContent = answers['soap'] || 'N/A';
+            document.getElementById('hairResult').textContent = answers['hair'] || 'N/A';
+            document.getElementById('dryResult').textContent = answers['dry'] || 'N/A';
+            document.getElementById('deodorantResult').textContent = answers['deodorant'] || 'N/A';
+
+            // Display the calculated stink score
+            document.getElementById('stinkScore').textContent = stinkScore;
+
+            // Display the user's name in the personalized message
+            document.getElementById('nameDisplay').textContent = userName;
+
+            // Find and display the stink message based on stink score
+            const messageIndex = Math.round(stinkScore * 100);
+            document.getElementById('stinkMessage').textContent = stinkMessages[messageIndex];
+        }
+    });
+
+</script>
+{% endblock %}
