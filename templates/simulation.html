@@ -4,25 +4,39 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-9 map-section">
-            <div class="card card-map">
-                <div class="map-container" id="map"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-7 map-section">
+                <div class="card card-map">
+                    <div class="map-container" id="map"></div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-3 list-section">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card mb-3">
-                        <div class="card-header bg-success text-light">The BO Brigade</div>
-                        <ul class="list-group" id="bo-brigade"></ul>
+    
+            <div class="col-md-3 graph-section">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-light">Funk Factor</div>
+                            <div class="card-body">
+                                <canvas id="line-chart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="card">
+                            <div class="card-header bg-warning text-light">Crowded and Clouded</div>
+                            <div class="card-body">
+                                <canvas id="bar-chart" height="150"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-info text-light">Funk Factor</div>
-                        <div class="card-body"><canvas id="line-chart" height="150"></canvas></div>
-                    </div>
+            </div>
+    
+            <div class="col-md-2 list-section">
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-light">The BO Brigade</div>
+                    <ul class="list-group" id="bo-brigade"></ul>
                 </div>
             </div>
         </div>
@@ -78,10 +92,36 @@
         }
     });
 
+    const barCtx = document.getElementById('bar-chart').getContext('2d');
+    const buildingFullnessBarChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Building Fullness',
+                data: [],
+                backgroundColor: ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#800080'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Buildings' }, ticks: {autoskip: true} },
+                y: {
+                    beginAtZero: true,
+                    min: 0.0,      
+                    max: 1.0, 
+                    title: { display: true, text: 'Fullness' }
+                }
+            }
+        }
+    });
+
     const socket = io();
     socket.on('new_student', data => addHtmlPointToMap(data.student_id, data.lat, data.lng, data.name, data.stinkLevel, data.poi, data.time_studied));
     socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi, data.time_studied));
-    socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick));
+    socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick, data.fullness));
 
     function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi, time_studied) 
     {
@@ -159,9 +199,10 @@
         });
     }
 
-    function updateBuilding(buildingId, buildingName, lat, lng, stinkLevel, capacity, tick) {
+    function updateBuilding(buildingId, buildingName, lat, lng, stinkLevel, capacity, tick, fullness) {
         console.log(`Updating building: ${buildingId}, Tick: ${tick}, StinkLevel: ${stinkLevel}`);
         updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel);
+        updateBarChartWithBuildingData(buildingId, buildingName, fullness);
     }
 
     function updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel) {
@@ -185,6 +226,18 @@
         buildingStinkLevelGraph.update();
     }
 
+    function updateBarChartWithBuildingData(buildingId, buildingName, fullness) {
+        let index = buildingFullnessBarChart.data.labels.indexOf(buildingName);
+
+        if (index === -1) {
+            buildingFullnessBarChart.data.labels.push(buildingName);
+            buildingFullnessBarChart.data.datasets[0].data.push(fullness);
+        } else {
+            buildingFullnessBarChart.data.datasets[0].data[index] = fullness;
+        }
+
+        buildingFullnessBarChart.update();
+    }
 
 });
 </script>

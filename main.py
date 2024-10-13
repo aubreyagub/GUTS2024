@@ -125,35 +125,36 @@ def main():
         for i in range(len(agents)):
             agent = simulation[0]["agents"][i]
             socketio.emit('new_student', {
-                'student_id': i, 
-                'lat': agent.current_coordinate[0], 
-                'lng': agent.current_coordinate[1], 
-                'name': agent.name, 
-                'stinkLevel': agent.stink, 
-                'poi': agent.poi
+                'student_id': int(i), 
+                'lat': float(agent.current_coordinate[0]), 
+                'lng': float(agent.current_coordinate[1]), 
+                'name': str(agent.name), 
+                'stinkLevel': float(agent.stink), 
+                'poi': bool(agent.poi)
             })
 
         for tick in simulation[1:]:
             # do post requests
             for i, agent in enumerate(tick["agents"]):
                 socketio.emit('update_student', {
-                    'student_id': i, 
-                    'lat': agent.current_coordinate[0], 
-                    'lng': agent.current_coordinate[1], 
-                    'stinkLevel': agent.stink, 
-                    'poi': agent.poi,
-                    'time_studied': agent.time_studied
+                    'student_id': int(i), 
+                    'lat': float(agent.current_coordinate[0]), 
+                    'lng': float(agent.current_coordinate[1]), 
+                    'stinkLevel': float(agent.stink), 
+                    'poi': bool(agent.poi),
+                    'time_studied': int(agent.time_studied)
                 })
 
             for i,building in enumerate(tick["buildings"].values()):
                 socketio.emit('update_building', {
-                    'building_id': i,
-                    'buildingName': building.name.value,
-                    'lat': building.coordinate[0],
-                    'lng': building.coordinate[1],
-                    'stinkLevel': building.stink,
-                    'capacity': building.capacity,
-                    'tick' : tick["tick_count"]
+                    'building_id': int(i),
+                    'buildingName': str(building.name.value),
+                    'lat': float(building.coordinate[0]),
+                    'lng': float(building.coordinate[1]),
+                    'stinkLevel': float(building.stink),
+                    'capacity': float(building.capacity),
+                    'tick' : int(tick["tick_count"]),
+                    'fullness' : float(building.fullness)
                 })
 
             time.sleep(0.25)
