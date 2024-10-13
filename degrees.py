@@ -21,6 +21,8 @@ class ComputerScience(Degree):
         BuildingName.SHADOW_REALM: 0.0
     }
 
+    #DAILY_STUDY_HOURS_TO_PASS
+
     def __str__(self):
         return "Computer Science"
 
