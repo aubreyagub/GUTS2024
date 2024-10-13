@@ -47,6 +47,8 @@
                             </div>
                         </div>
                         <div class="text-center mt-4">
+                            <button id="showSimulationButton" class="btn btn-primary btn-lg" disabled>Show
+                                Simulation</button>
                             <button onclick="window.location.reload();" class="btn btn-secondary btn-lg">Take
                                 Again</button>
                         </div>
@@ -55,6 +57,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Include SocketIO client library -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"
+        integrity="sha384-GYfScIh0VtVgN9nI6g7Oi/Qj7FbkEYB4sHiNJbrP5cV5XJqU+fNocYxg3fXe55zm"
+        crossorigin="anonymous"></script>
 </div>
 {% endblock %}
 
@@ -63,6 +70,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         let currentQuestionIndex = 0;
         let userName = ''; // Variable to store user's name
+        let sessionId = ''; // Variable to store session ID
         const questions = [
             { id: 'shower', question: 'Did you shower today?', weight: 1.0 },  // Shower determines if score is 1 right away
             { id: 'soap', question: 'Did you use soap?', weight: 0.4 },
@@ -180,6 +188,9 @@
         ];
 
 
+        // Initialize SocketIO client
+        const socket = io.connect();
+
         // Handle name submission and start the survey
         document.getElementById('nameSubmitButton').addEventListener('click', function () {
             const nameInput = document.getElementById('nameInput').value.trim();
@@ -274,8 +285,55 @@
             // Find and display the stink message based on stink score
             const messageIndex = Math.round(stinkScore * 100);
             document.getElementById('stinkMessage').textContent = stinkMessages[messageIndex];
+
+            // Start the simulation
+            sendDataToServer();
+        }
+
+        function sendDataToServer() {
+            // Generate a unique session ID for this user
+            sessionId = generateSessionId();
+
+            // Join a room with the session ID
+            socket.emit('join', { sessionId: sessionId });
+
+            fetch('/start_simulation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'name': userName,
+                    'stink_score': stinkScore,
+                    'session_id': sessionId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle response from server if needed
+                    console.log('Simulation started:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Listen for 'simulation_complete' event
+        socket.on('simulation_complete', function (data) {
+            console.log('Simulation complete:', data);
+            // Enable the "Show Simulation" button
+            document.getElementById('showSimulationButton').disabled = false;
+        });
+
+        // Handle "Show Simulation" button click
+        document.getElementById('showSimulationButton').addEventListener('click', function () {
+            window.location.href = '/simulation';
+        });
+
+        function generateSessionId() {
+            // Simple function to generate a random session ID
+            return 'session_' + Math.random().toString(36).substr(2, 9);
         }
     });
-
 </script>
 {% endblock %}
