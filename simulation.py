@@ -5,6 +5,7 @@ from degrees import *
 import random
 from copy import deepcopy
 import requests
+import names
 
 from frontend.maptiler_key import MAPTILER_KEY
 
@@ -18,8 +19,9 @@ import time
 
 STUDENT_COUNT = 50
 
-def generate_student(buildings):
-    name = "A"
+def generate_student(buildings, name=""):
+    if name == "":
+        name = names.get_full_name()
     degree = random.choice(list(DegreeTitle))
     return Agent(name, degree.value, buildings)
 
