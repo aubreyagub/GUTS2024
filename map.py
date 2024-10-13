@@ -10,8 +10,13 @@ class Map:
     def __init__(self, agents: list[Agent], buildings: list[Building]):
         self.agents = agents
         self.buildings = buildings
+        self.total_study_time = 0
+        self.total_stink = 0
 
     def update(self):
+        self.total_stink = self.get_total_stink()
+        self.total_study_time = self.get_total_study_time()
+        
         building_occupancy = {}
 
         building_occupancy = self.get_building_occupancies()
@@ -38,6 +43,12 @@ class Map:
         total = 0
         for agent in self.agents:
             total += agent.stink
+        return total
+    
+    def get_total_study_time(self):
+        total = 0
+        for agent in self.agents:
+            total += agent.time_studied
         return total
 
     def clean(self):

@@ -112,7 +112,11 @@ def main():
 
         for i in range(tick_count):
             map.update()
-            simulation.append({"agents": deepcopy(agents), "buildings": deepcopy(buildings), "tick_count": i})
+            simulation.append({"agents": deepcopy(agents), 
+                               "buildings": deepcopy(buildings),
+                                "tick_count": i,
+                                "total_study_time": deepcopy(map.total_study_time)
+                                })
 
         print(f"Simulation complete. {len(simulation)} ticks recorded")
 
@@ -137,7 +141,8 @@ def main():
                     'lat': agent.current_coordinate[0], 
                     'lng': agent.current_coordinate[1], 
                     'stinkLevel': agent.stink, 
-                    'poi': agent.poi
+                    'poi': agent.poi,
+                    'time_studied': agent.time_studied
                 })
 
             for i,building in enumerate(tick["buildings"].values()):
@@ -158,4 +163,4 @@ if __name__ == "__main__":
     simulation_thread.daemon = True  # Ensures thread exits when main program exits
     simulation_thread.start()
 
-    socketio.run(app, debug=True, port=PORT)
+    socketio.run(app, debug=False, log_output=True, port=PORT)
