@@ -63,24 +63,25 @@
     });
 
     const ctx = document.getElementById('line-chart').getContext('2d');
-    const myLineChart = new Chart(ctx, {
+    const buildingStinkLevelGraph = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [1, 2, 3, 4, 5],
-            datasets: [
-                { label: 'Boyd Orr', data: [0.1, 0.2, 0.3, 0.4, 0.5], borderColor: 'rgba(0, 0, 255, 1)', borderWidth: 2, fill: false },
-                { label: 'Library', data: [0.1, 0.2, 0.1, 0.5, 0.3], borderColor: 'rgba(0, 255, 0, 1)', borderWidth: 2, fill: false }
-            ]
+            labels: [],  
+            datasets: []  
         },
         options: {
             responsive: true,
-            scales: { x: { beginAtZero: true, title: { display: true, text: 'Time (minutes)' } }, y: { beginAtZero: true, min: 0.0, max: 1.0, title: { display: true, text: 'Stink Level' } } }
+            scales: {
+                x: { beginAtZero: true, title: { display: true, text: 'Time (minutes)' } },
+                y: { beginAtZero: true, min: 0.0, max: 0.1, title: { display: true, text: 'Stink Level' } }
+            }
         }
     });
 
     const socket = io();
     socket.on('new_student', data => addHtmlPointToMap(data.student_id, data.lat, data.lng, data.name, data.stinkLevel, data.poi));
     socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi));
+    socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick));
 
     function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi) 
     {
@@ -136,7 +137,7 @@
         const listElement = document.getElementById('bo-brigade');
         listElement.innerHTML = '';
 
-        const sortedStudents = Object.values(students).sort((a, b) => b.stinkLevel - a.stinkLevel);
+        const sortedStudents = Object.values(students).sort((a, b) => b.stinkLevel - a.stinkLevel).slice(0, 10);
         sortedStudents.forEach((student, index) => 
         {
             const listItem = document.createElement('li');
@@ -151,6 +152,34 @@
             listElement.appendChild(listItem);
         });
     }
+
+    function updateBuilding(buildingId, buildingName, lat, lng, stinkLevel, capacity, tick) {
+        console.log(`Updating building: ${buildingId}, Tick: ${tick}, StinkLevel: ${stinkLevel}`);
+        updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel);
+    }
+
+    function updateGraphWithBuildingData(buildingId, buildingName, tick, stinkLevel) {
+        const buildingColours = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#800080'];
+        const colour = buildingColours[buildingId];
+
+        let dataset = buildingStinkLevelGraph.data.datasets.find(dataset => dataset.label === buildingName);
+
+        if (dataset) {
+            dataset.data.push({ x: tick, y: stinkLevel });
+        } else {
+            buildingStinkLevelGraph.data.datasets.push({
+                label: buildingName,
+                data: [{ x: tick, y: stinkLevel }],
+                borderColor: colour,
+                fill: false,
+                borderWidth: 2
+            });
+        }
+
+        buildingStinkLevelGraph.update();
+    }
+
+
 });
 </script>
 {% endblock %}
