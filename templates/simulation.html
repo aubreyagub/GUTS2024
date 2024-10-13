@@ -79,11 +79,11 @@
     });
 
     const socket = io();
-    socket.on('new_student', data => addHtmlPointToMap(data.student_id, data.lat, data.lng, data.name, data.stinkLevel, data.poi));
-    socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi));
+    socket.on('new_student', data => addHtmlPointToMap(data.student_id, data.lat, data.lng, data.name, data.stinkLevel, data.poi, data.time_studied));
+    socket.on('update_student', data => updateHtmlPointOnMap(data.student_id, data.lat, data.lng, data.stinkLevel, data.poi, data.time_studied));
     socket.on('update_building', data => updateBuilding(data.building_id, data.buildingName, data.lat, data.lng, data.stinkLevel, data.capacity, data.tick));
 
-    function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi) 
+    function addHtmlPointToMap(studentId, lat, lng, name, stinkLevel, poi, time_studied) 
     {
         if (!students[studentId])
         {
@@ -101,13 +101,13 @@
                 labelMarker = new maplibregl.Marker({ element: label, anchor: 'top', offset: [0, 5] }).setLngLat([lng, lat]).addTo(map);
             }
             
-            students[studentId] = { lat, lng, name, stinkLevel, pointMarker, labelMarker, poi };
+            students[studentId] = { lat, lng, name, stinkLevel, pointMarker, labelMarker, poi, time_studied};
         }
 
         updateBOBrigade();
     }
 
-    function updateHtmlPointOnMap(studentId, lat, lng, stinkLevel, poi)
+    function updateHtmlPointOnMap(studentId, lat, lng, stinkLevel, poi, time_studied)
     {
         if (students[studentId])
         {
@@ -128,6 +128,7 @@
             
             students[studentId].stinkLevel = stinkLevel;
             students[studentId].poi = poi;
+            students[studentId].time_studied = time_studied;
             updateBOBrigade();
         }
     }
@@ -146,9 +147,14 @@
         
             const badge = document.createElement('span');
             badge.className = 'badge badge-primary badge-pill';
-            badge.textContent = student.stinkLevel;
+            badge.textContent = Math.round(student.stinkLevel*100) + "% Stinky";
+
+            const hours = document.createElement('span');
+            hours.className = 'badge badge-primary badge-pill';
+            hours.textContent = Math.round((student.time_studied/1200)*480) + "% Study"; 
         
             listItem.appendChild(badge);
+            listItem.appendChild(hours)
             listElement.appendChild(listItem);
         });
     }
