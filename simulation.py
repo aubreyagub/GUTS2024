@@ -25,12 +25,12 @@ def generate_student(buildings):
 
 def main():
     buildings = {
-        BuildingName.BOYD_ORR: Building(BuildingName.BOYD_ORR,(55.873498, -4.292804), 15),  # , has_shower=True),
-        BuildingName.JMS: Building(BuildingName.JMS, (55.873150, -4.292460), 10),
-        BuildingName.FRASER_BUILDING: Building(BuildingName.FRASER_BUILDING,(55.873218, -4.288445), 10),
-        BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, (55.872346, -4.288193), 10),
-        BuildingName.ASBS: Building(BuildingName.ASBS, (55.870739, -4.295667), 10),
-        BuildingName.LIBRARY: Building(BuildingName.LIBRARY, (55.873323, -4.288474), 25),
+        BuildingName.BOYD_ORR: Building(BuildingName.BOYD_ORR,(55.8736, -4.2929), 15),  # , has_shower=True), #
+        BuildingName.JMS: Building(BuildingName.JMS, (55.873204, -4.292221), 10), #
+        BuildingName.FRASER_BUILDING: Building(BuildingName.FRASER_BUILDING,(55.873109, -4.287863), 10), #
+        BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, (55.872737, -4.287961), 10), # 
+        BuildingName.ASBS: Building(BuildingName.ASBS, (55.870620, -4.296032), 10), #
+        BuildingName.LIBRARY: Building(BuildingName.LIBRARY, (55.873611, -4.292889), 25), # 
         BuildingName.SHADOW_REALM: Building(BuildingName.SHADOW_REALM, (0, 0), math.inf)
     }
 
