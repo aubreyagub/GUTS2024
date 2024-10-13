@@ -5,6 +5,6 @@ class BuildingName(Enum):
     JMS = "JMS"
     FRASER_BUILDING = "Fraser Building"
     READING_ROOM = "Round Reading Room"
-    #ASBS = "Adam Smith Business School"
+    ASBS = "Adam Smith Business School"
     LIBRARY = "Main Library"
     SHADOW_REALM = "The Shadow Realm"

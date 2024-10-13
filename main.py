@@ -1,15 +1,13 @@
-from agent import Agent
 from flask import Flask, render_template, jsonify, request
-from building import Building
-from map import Map
-from enum import Enum
-import random
 from degrees import *
 from copy import deepcopy
 from flask_socketio import SocketIO, emit, join_room
-import threading
 import time
 import math
+import random
+from agent import Agent
+import simulation
+import threading
 
 from frontend.maptiler_key import MAPTILER_KEY
 
@@ -21,23 +19,7 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 app.config['SECRET_KEY'] = 'your_secret_key'
 
-# Initialize buildings and agents globally
-buildings = {
-    BuildingName.BOYD_ORR: Building(BuildingName.BOYD_ORR, (55.873498, -4.292804), 15),
-    BuildingName.JMS: Building(BuildingName.JMS, (55.873150, -4.292460), 10),
-    BuildingName.FRASER_BUILDING: Building(BuildingName.FRASER_BUILDING, (55.873218, -4.288445), 10),
-    BuildingName.READING_ROOM: Building(BuildingName.READING_ROOM, (55.872346, -4.288193), 10),
-    BuildingName.LIBRARY: Building(BuildingName.LIBRARY, (55.873323, -4.288474), 25),
-    BuildingName.SHADOW_REALM: Building(
-        BuildingName.SHADOW_REALM, (0, 0), math.inf)
-}
-
 agents = []  # Start with an empty list
-simulation_thread = threading.Thread(target=lambda: None)
-simulation_thread_started = False
-agent_lock = threading.Lock()
-simulation_complete = threading.Event()
-
 
 @app.route('/')
 def index():
@@ -48,9 +30,54 @@ def index():
 def formulae():
     return render_template('formulae.html', active_page='formulae')
 
+@app.route("/add_students", methods=["POST"])
+def add_students():
+    agents = request.get_json()
+    for i,agent in enumerate(agents):
+        socketio.emit('new_student', {
+            'student_id': i, 
+            'lat': agent.get("current_coordinate")[0], 
+            'lng': agent.get("current_coordinate")[1], 
+            'name': agent.get("name"), 
+            'stinkLevel': agent.get("stink"), 
+            'poi': agent.get("poi", False)
+        })
+    return jsonify({"status": f"{len(agents)} agents data emitted"}), 200
+
+@app.route("/update_students", methods=["POST"])
+def update_student():
+    agents = request.get_json()
+    for i,agent in enumerate(agents):
+        socketio.emit('update_student', {
+            'student_id': i, 
+            'lat': agent.get("current_coordinate")[0], 
+            'lng': agent.get("current_coordinate")[1], 
+            'stinkLevel': agent.get("stink"), 
+            'poi': agent.get("poi", False),
+            'time_studied': agent.get("time_studied")
+        })
+    return jsonify({"status": f"{len(agents)} agents were updated"}), 200
+
+@app.route("/update_buildings", methods=["POST"])
+def update_buildings():
+    buildings = request.get_json()
+    for i,building in enumerate(buildings):
+        socketio.emit('update_building', {
+            'building_id': i,
+            'buildingName': building.name.value,
+            'lat': building.coordinate[0],
+            'lng': building.coordinate[1],
+            'stinkLevel': building.stink,
+            'capacity': building.capacity,
+            'tick' : building.tick
+        })
+    return jsonify({"status": f"{len(buildings)} buildings were updated"}), 200
 
 @app.route('/simulation')
-def simulation():
+def simulation_page():
+    # Start the simulation in a separate thread
+    simulation_thread = threading.Thread(target=simulation.run)
+    simulation_thread.start()
     return render_template('simulation.html', maptiler_key=MAPTILER_KEY, active_page='simulation')
 
 
@@ -63,7 +90,6 @@ def on_join(data):
 
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
-    global simulation_thread, simulation_thread_started
     data = request.get_json()
     name = data.get('name')
     stink_score = data.get('stink_score')
@@ -74,80 +100,22 @@ def start_simulation():
 
     # Create a new Agent with the provided name and stink score
     degree = random.choice(list(DegreeTitle))
-    new_agent = Agent(name, degree.value, buildings,
+    new_agent = Agent(name, degree.value, simulation.buildings,
                       stink=stink_score, poi=True)
+    
+    simulation.generate(new_agent)
 
-    # Add the new agent to the agents list
-    with agent_lock:
-        agents.append(new_agent)
-
-    # If the simulation hasn't started yet, start it
-    if not simulation_thread_started:
-        simulation_thread = threading.Thread(target=main, args=(session_id,))
-        simulation_thread.daemon = True  # Ensures thread exits when main program exits
-        simulation_thread.start()
-        simulation_thread_started = True
-    else:
-        # If simulation is already running, you may decide how to handle it
-        pass
+    socketio.emit('simulation_complete', {
+                  'message': 'Simulation is complete.'}, room=session_id)
 
     return jsonify({'status': 'Simulation started with new agent'}), 200
+    
 
 
 def generate_student(buildings):
     name = "Student"
     degree = random.choice(list(DegreeTitle))
     return Agent(name, degree.value, buildings)
-
-
-def main(session_id):
-    global agents, buildings
-    # Initialize other agents
-    with agent_lock:
-        if len(agents) < STUDENT_COUNT:
-            for i in range(STUDENT_COUNT - len(agents)):
-                agents.append(generate_student(buildings))
-
-    # Map and simulation logic
-    map = Map(agents, buildings)
-    tick_count = 480
-    print(f"Simulating {tick_count} ticks")
-
-    for tick in range(tick_count):
-        map.update()
-
-        # Send updates to clients via SocketIO
-        with agent_lock:
-            current_agents = agents.copy()
-
-        # For each agent
-        for i, agent in enumerate(current_agents):
-            socketio.emit('update_student', {
-                'student_id': i,
-                'lat': agent.current_coordinate[0],
-                'lng': agent.current_coordinate[1],
-                'stinkLevel': agent.stink,
-                'poi': agent.poi
-            })
-
-        # For each building
-        for i, building in enumerate(buildings.values()):
-            socketio.emit('update_building', {
-                'building_id': i,
-                'buildingName': building.name.value,
-                'lat': building.coordinate[0],
-                'lng': building.coordinate[1],
-                'stinkLevel': building.stink,
-                'capacity': building.capacity
-            })
-
-        time.sleep(0.05)  # Adjust as needed
-
-    # Simulation complete
-    # Emit 'simulation_complete' event to the specific client
-    socketio.emit('simulation_complete', {
-                  'message': 'Simulation is complete.'}, room=session_id)
-
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, port=PORT)
