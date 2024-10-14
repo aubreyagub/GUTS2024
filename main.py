@@ -13,7 +13,7 @@ from frontend.maptiler_key import MAPTILER_KEY
 
 DEBUG = False
 STUDENT_COUNT = 50
-PORT = 5000
+PORT = 3000
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -118,4 +118,4 @@ def generate_student(buildings):
     return Agent(name, degree.value, buildings)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, port=PORT)
+    socketio.run(app, allow_unsafe_werkzeug=True, debug=True, port=PORT)
